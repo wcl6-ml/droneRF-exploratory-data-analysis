@@ -7,15 +7,10 @@ RUN apt-get update && apt-get install -y \
 ARG USERNAME=vscode
 RUN userdel ubuntu && \
     useradd -m -s /bin/bash -u 1000 $USERNAME \
-    && mkdir -p /home/vscode/.local/state/mise \
-               /home/vscode/.local/share/mise \
-               /home/vscode/.cache/ \
-    && chown -R vscode:vscode /home/vscode/.local \
+    && mkdir -p /home/vscode/.cache/ \
     && chown -R vscode:vscode /home/vscode/.cache \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh
-RUN echo 'eval "$(mise activate bash)"' >> /home/vscode/.bashrc
 
 USER $USERNAME
 WORKDIR /workspace
