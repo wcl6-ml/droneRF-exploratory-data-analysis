@@ -1,0 +1,19 @@
+{
+  "name": "RF-Autonomous-Lab",
+  "build": { "context": "..", "dockerfile": "Dockerfile" },
+  "runArgs": [ "--gpus", "all", "--ipc=host" ],
+  "mounts": [
+    "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind",
+    "source=${localEnv:HOME}/.local,target=/home/vscode/.local,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [ "ms-python.python", "jdxcode.mise-vscode" ]
+    }
+  },
+  "remoteUser": "vscode",
+  "initializeCommand": "mkdir -p ${HOME}/.local/share/mise && chown -R $(whoami) ${HOME}/.local/share/mise",
+  "postCreateCommand": " scripts/setup && scripts/install_torch.sh"
+
+  //"postCreateCommand": "chmod +x scripts/setup && scripts/setup && chmod +x scripts/install_torch.sh && scripts/install_torch.sh"
+}

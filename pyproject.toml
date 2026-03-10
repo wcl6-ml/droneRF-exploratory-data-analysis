@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlops_anomaly_detection"
+version = "0.1.0"
+description = "PhD to MLOps transition project"
+requires-python = ">=3.10"
+# Base dependencies required for BOTH training and serving
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "mlflow==3.8.1",
+    "evidently",
+    "python-dotenv",
+    "psycopg2-binary",
+]
+
+[project.optional-dependencies]
+# Dependencies specific to the FastAPI prediction service
+serve = [
+    "fastapi",
+    "uvicorn",
+    "pydantic==2.5.0",
+    "requests==2.31.0",
+    "prometheus-client",
+    "prometheus-fastapi-instrumentator",
+    "psycopg2-binary"
+]
+# Dependencies for development and CI/CD
+dev = [
+    "pytest",
+    "pytest-cov",   
+    "black",
+    "flake8",
+    "httpx", # Useful for testing FastAPI
+]
