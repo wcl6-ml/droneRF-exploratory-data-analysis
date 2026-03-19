@@ -11,6 +11,5 @@ RUN userdel ubuntu && \
     && chown -R vscode:vscode /home/vscode/.cache \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-
 USER $USERNAME
 WORKDIR /workspace

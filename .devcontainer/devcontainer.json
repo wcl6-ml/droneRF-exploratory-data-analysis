@@ -6,7 +6,7 @@
     "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind"
   ],
   "remoteUser": "vscode",
-  "postCreateCommand": "scripts/install_torch.sh"
+  "postCreateCommand": "scripts/install_pip.sh"
 
   //"postCreateCommand": "chmod +x scripts/setup && scripts/setup && chmod +x scripts/install_torch.sh && scripts/install_torch.sh"
 }
