@@ -2,4 +2,6 @@
 __pycache__/
 *.pyc
 *.egg*
+__init__.py
+# data
 data/*

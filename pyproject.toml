@@ -10,6 +10,7 @@ requires-python = ">=3.10"
 # Base dependencies required for BOTH training and serving
 dependencies = [
     "numpy",
+    "h5py",
     "pandas",
     "scikit-learn",
     "mlflow==3.8.1",
