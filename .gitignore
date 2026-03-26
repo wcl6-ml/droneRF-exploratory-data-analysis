@@ -5,3 +5,8 @@ __pycache__/
 __init__.py
 # data
 data/*
+
+# archive
+archive/
+reports/
+tmp/

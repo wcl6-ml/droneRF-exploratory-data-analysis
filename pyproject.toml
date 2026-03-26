@@ -17,6 +17,7 @@ dependencies = [
     "evidently",
     "python-dotenv",
     "psycopg2-binary",
+    "xgboost"
 ]
 
 [project.optional-dependencies]
