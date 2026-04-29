@@ -1,0 +1,12 @@
+#!/bin/bash
+/usr/local/bin/mise trust --yes /workspaces/$DEVPOD_WORKSPACE_ID/mise.toml && /usr/local/bin/mise install --yes
+
+# install python packages
+if ! python -c "import torch" &>/dev/null; then
+    echo "Torch not found. Installing..."
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+else
+    echo "Torch already present in base image. Skipping heavy download."
+fi
+
+pip install -e ".[serve,dev]"

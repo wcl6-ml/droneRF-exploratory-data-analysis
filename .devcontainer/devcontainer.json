@@ -2,11 +2,11 @@
   "name": "RF-Autonomous-Lab",
   "build": { "context": "..", "dockerfile": "Dockerfile" },
   "runArgs": [ "--gpus", "all", "--ipc=host" ],
-  "mounts": [
-    "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind"
-  ],
+//  "mounts": [
+//    "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind"
+//  ],
   "remoteUser": "vscode",
-  "postCreateCommand": "scripts/install_pip.sh"
+  "postCreateCommand": "chmod +x scripts/setup & scripts/setup",
 
   //"postCreateCommand": "chmod +x scripts/setup && scripts/setup && chmod +x scripts/install_torch.sh && scripts/install_torch.sh"
 }
