@@ -26,38 +26,54 @@ from pathlib import Path
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
-root_dir = Path(__file__).resolve().parent.parent.parent
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+import yaml
 
-RAW_ROOT   = root_dir / "data/raw/DroneRF"
-OUT_FILE   = root_dir / "data/interim/dronerf.h5"
-SPLIT_FILE = root_dir / "data/interim/dronerf_splits.json"
+load_dotenv()  # reads .env into os.environ
 
-L: int = 100_000   # samples per segment, from MATLAB: L = 1e5
+def load_config(path: Path = Path("config/data.yaml")) -> dict:
+    with open(path) as f:
+        return yaml.safe_load(f)
 
-# H-band: 40 MHz, L-band: 10 MHz  (USRP B210, from the paper)
-BAND_FS: dict[str, float] = {"H": 40e6, "L": 10e6}
+cfg = load_config()
 
-BUI_MAP: dict[str, str] = {
-    "00000": "background",
-    "10000": "bebop",  "10001": "bebop",
-    "10010": "bebop",  "10011": "bebop",
-    "10100": "ar",     "10101": "ar",
-    "10110": "ar",     "10111": "ar",
-    "11000": "phantom",
-}
 
-# Integer label for classification — stable across runs
-LABEL_MAP: dict[str, int] = {
-    "background": 0,
-    "bebop":      1,
-    "ar":         2,
-    "phantom":    3,
-}
+# Paths — from environment, find root for local if .env not set
+def find_project_root(marker: str = "pyproject.toml") -> Path:
+    """Walk up from this file until we find the marker."""
+    current = Path(__file__).resolve().parent
+    for parent in [current, *current.parents]:
+        if (parent / marker).exists():
+            return parent
+    raise RuntimeError(
+        f"Could not find project root (looking for {marker}). "
+        f"Started search from {current}"
+    )
 
-VAL_FRAC:    float = 0.10   # fraction of train set held out for validation
-TEST_FRAC:   float = 0.15   # fraction of full dataset held out as test
-RANDOM_SEED: int   = 42
+root_dir = find_project_root()
 
+RAW_ROOT   = Path(os.getenv("RAW_ROOT") or root_dir / "data/raw/DroneRF")
+OUT_FILE   = Path(os.getenv("OUT_FILE") or root_dir / "data/interim/dronerf.h5")
+SPLIT_FILE = Path(os.getenv("SPLIT_FILE") or root_dir / "data/interim/dronerf_splits.json")
+
+# Resolve relative paths against project root
+if not RAW_ROOT.is_absolute():
+    RAW_ROOT = root_dir / RAW_ROOT
+if not OUT_FILE.is_absolute():
+    OUT_FILE = root_dir / OUT_FILE
+if not SPLIT_FILE.is_absolute():
+    SPLIT_FILE = root_dir / SPLIT_FILE
+
+# Scientific constants — from config, not hardcoded
+L          = cfg["dataset"]["segment_length"]
+BAND_FS    = cfg["dataset"]["band_fs"]
+BUI_MAP    = cfg["dataset"]["bui_map"]
+LABEL_MAP  = cfg["dataset"]["label_map"]
+VAL_FRAC   = cfg["splits"]["val_frac"]
+TEST_FRAC  = cfg["splits"]["test_frac"]
+RANDOM_SEED = cfg["splits"]["random_seed"]
 
 # ---------------------------------------------------------------------------
 # Helpers

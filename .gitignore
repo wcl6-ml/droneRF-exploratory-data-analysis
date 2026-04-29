@@ -6,6 +6,9 @@ __init__.py
 # data
 data/*
 
+# Environment variable
+.env
+
 # archive
 archive/
 reports/

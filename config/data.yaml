@@ -1,0 +1,28 @@
+dataset:
+  segment_length: 100000      # L — samples per segment (MATLAB: L = 1e5)
+  band_fs:
+    H: 40_000_000.0           # 40 MHz USRP B210
+    L: 10_000_000.0           # 10 MHz USRP B210
+
+  bui_map:
+    "00000": background
+    "10000": bebop
+    "10001": bebop
+    "10010": bebop
+    "10011": bebop
+    "10100": ar
+    "10101": ar
+    "10110": ar
+    "10111": ar
+    "11000": phantom
+
+  label_map:
+    background: 0
+    bebop: 1
+    ar: 2
+    phantom: 3
+
+splits:
+  val_frac: 0.10
+  test_frac: 0.15
+  random_seed: 42
