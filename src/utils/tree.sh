@@ -1,2 +1,2 @@
 #!/bin/bash
-tree -I '*.rar|*.csv|*egg*' --ignore-case
+tree -I '*.rar|*.csv|*egg*|DroneRF/' --ignore-case
