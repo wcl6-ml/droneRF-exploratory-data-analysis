@@ -52,7 +52,7 @@ def find_project_root(marker: str = "pyproject.toml") -> Path:
         f"Started search from {current}"
     )
 
-root_dir = find_project_root()
+root_dir = Path(os.environ.get("PROJECT_ROOT", find_project_root()))
 
 RAW_ROOT   = Path(os.getenv("RAW_ROOT") or root_dir / "data/raw/DroneRF")
 OUT_FILE   = Path(os.getenv("OUT_FILE") or root_dir / "data/interim/dronerf.h5")
