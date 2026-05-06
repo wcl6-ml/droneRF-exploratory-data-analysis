@@ -1,0 +1,56 @@
+stages:
+  # ── Stage 1: aggregate raw csv data to .h5 ───────────────────
+  generate_data:
+    cmd: python src/data/data_aggregator.py
+    deps:
+      - src/data/data_aggregator.py
+    outs:
+      - data/interim/dronerf.h5
+      - data/interim/dronerf.meta.parquet
+      - data/interim/dronerf_splits.json
+
+
+
+  # ── Stage 2: Feature Engineering ───────────────────────────────
+  # KEY STAGE for feature versioning:
+  featurize:
+    foreach: ["H", "L"]        # DVC iterates over this list
+    do:
+      cmd: python src/data/featurize.py --band ${item}
+      deps:
+        - src/data/featurize.py
+        - data/interim/dronerf.h5
+      params:
+        - config/features.yaml:
+            - dsp
+            - paths
+      outs:
+        - data/processed/${item}_scalars.npz
+        - data/processed/${item}_meta.parquet
+
+#  # ── Stage 3: Train ──────────────────────────────────────────────
+#  train:
+#    cmd: python src/train.py
+#    deps:
+#      - src/train.py
+#      - data/processed/features.csv  # if features didn't change → cached
+#    params:
+#      - train
+#    outs:
+#      - models/model.pkl
+#      - models/X_test.npy
+#      - models/y_test.npy
+#
+#  # ── Stage 4: Evaluate ───────────────────────────────────────────
+#  evaluate:
+#    cmd: python src/evaluate.py
+#    deps:
+#      - src/evaluate.py
+#      - models/model.pkl
+#      - models/X_test.npy
+#      - models/y_test.npy
+#    metrics:
+#      - metrics/scores.json:          # `dvc metrics diff` compares these
+#          cache: false                # keep in git so diffs are visible
+#      - metrics/feature_importance.json:
+#          cache: false

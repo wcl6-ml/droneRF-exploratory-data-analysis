@@ -20,3 +20,79 @@ stages:
       hash: md5
       md5: ee08c9dd9b9f6154dcd29933d9cddf26
       size: 590456
+  featurize@H:
+    cmd: python src/data/featurize.py --band H
+    deps:
+    - path: data/interim/dronerf.h5
+      hash: md5
+      md5: be15cb2915ef1444b67dc6b99694de2f
+      size: 4634087134
+    - path: src/data/featurize.py
+      hash: md5
+      md5: ca24a354c4b5c37774bf9d220fcc773d
+      size: 13223
+    params:
+      config/features.yaml:
+        dsp:
+          band_fs:
+            H: 40000000.0
+            L: 10000000.0
+          welch:
+            nperseg: 1024
+            noverlap: 768
+            nfft: 1024
+            window: hann
+          stft:
+            nperseg: 256
+            noverlap: 192
+        paths:
+          h5_file: data/interim/dronerf.h5
+          split_file: data/interim/dronerf_splits.json
+          save_dir: data/processed/
+    outs:
+    - path: data/processed/H_meta.parquet
+      hash: md5
+      md5: 8507974e189e68563bca253ca8e37bf0
+      size: 970985
+    - path: data/processed/H_scalars.npz
+      hash: md5
+      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
+      size: 444554
+  featurize@L:
+    cmd: python src/data/featurize.py --band L
+    deps:
+    - path: data/interim/dronerf.h5
+      hash: md5
+      md5: be15cb2915ef1444b67dc6b99694de2f
+      size: 4634087134
+    - path: src/data/featurize.py
+      hash: md5
+      md5: ca24a354c4b5c37774bf9d220fcc773d
+      size: 13223
+    params:
+      config/features.yaml:
+        dsp:
+          band_fs:
+            H: 40000000.0
+            L: 10000000.0
+          welch:
+            nperseg: 1024
+            noverlap: 768
+            nfft: 1024
+            window: hann
+          stft:
+            nperseg: 256
+            noverlap: 192
+        paths:
+          h5_file: data/interim/dronerf.h5
+          split_file: data/interim/dronerf_splits.json
+          save_dir: data/processed/
+    outs:
+    - path: data/processed/L_meta.parquet
+      hash: md5
+      md5: c172ee96bdf41db478769da5aad0f2b0
+      size: 987404
+    - path: data/processed/L_scalars.npz
+      hash: md5
+      md5: bfa2095e6244d7055f35e531923a62fd
+      size: 458753

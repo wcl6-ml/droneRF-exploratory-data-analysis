@@ -1,0 +1,19 @@
+paths:
+  h5_file:    data/interim/dronerf.h5
+  split_file: data/interim/dronerf_splits.json
+  save_dir: data/processed/
+
+dsp:
+  band_fs:
+    H: 40_000_000.0          # 40 MHz USRP B210
+    L: 10_000_000.0          # 10 MHz USRP B210
+
+  welch:
+    nperseg:  1024
+    noverlap: 768             # 75% overlap
+    nfft:     1024
+    window:   hann
+
+  stft:                       # EDA only — not used in feature extraction
+    nperseg:  256             # smaller → time resolution for blade-rate AM (~100–400 Hz)
+    noverlap: 192             # 75% overlap
