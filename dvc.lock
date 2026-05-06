@@ -1,0 +1,22 @@
+schema: '2.0'
+stages:
+  generate_data:
+    cmd: python src/data/data_aggregator.py
+    deps:
+    - path: src/data/data_aggregator.py
+      hash: md5
+      md5: 5afd125666a0d27746e800709db27dee
+      size: 13804
+    outs:
+    - path: data/interim/dronerf.h5
+      hash: md5
+      md5: be15cb2915ef1444b67dc6b99694de2f
+      size: 4634087134
+    - path: data/interim/dronerf.meta.parquet
+      hash: md5
+      md5: a76a4290eae86bb86b9edeb732890b8f
+      size: 492869
+    - path: data/interim/dronerf_splits.json
+      hash: md5
+      md5: ee08c9dd9b9f6154dcd29933d9cddf26
+      size: 590456
