@@ -5,7 +5,7 @@ __pycache__/
 __init__.py
 # data
 data/*
-
+dvc-local
 # Environment variable
 .env
 
