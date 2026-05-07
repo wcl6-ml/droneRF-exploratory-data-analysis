@@ -18,7 +18,8 @@ dependencies = [
     "python-dotenv",
     "pyyaml",
     "psycopg2-binary",
-    "xgboost"
+    "xgboost",
+    "dvc[s3]"
 ]
 
 [project.optional-dependencies]

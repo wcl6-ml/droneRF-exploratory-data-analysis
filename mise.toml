@@ -1,3 +1,2 @@
 [tools]
 awscli = { version = "latest", symlink_bins = "true" }
-dvc = "latest"
