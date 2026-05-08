@@ -4,6 +4,7 @@ stages:
     cmd: python src/data/data_aggregator.py
     deps:
       - src/data/data_aggregator.py
+      - config/data.yaml
     outs:
       - data/interim/dronerf.h5
       - data/interim/dronerf.meta.parquet

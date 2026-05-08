@@ -3,10 +3,14 @@ stages:
   generate_data:
     cmd: python src/data/data_aggregator.py
     deps:
+    - path: config/data.yaml
+      hash: md5
+      md5: f5fbd7695ff47f7bf2914f140f5b53d3
+      size: 523
     - path: src/data/data_aggregator.py
       hash: md5
-      md5: 5afd125666a0d27746e800709db27dee
-      size: 13804
+      md5: e0de06477230f9087fa40bba1d23222a
+      size: 16865
     outs:
     - path: data/interim/dronerf.h5
       hash: md5
