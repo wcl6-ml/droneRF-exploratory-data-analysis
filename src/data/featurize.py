@@ -1,4 +1,4 @@
-import os 
+import os
 import argparse
 import json
 import time
@@ -17,16 +17,18 @@ import yaml
 from dotenv import load_dotenv
 
 warnings.filterwarnings("ignore", category=UserWarning)
-load_dotenv()
 
-def load_config(path: Path = Path("config/features.yaml")) -> dict:
+
+# ---------------------------------------------------------------------------
+# Config / path helpers  (called inside main(), not at import time)
+# ---------------------------------------------------------------------------
+
+def _load_config(path: Path) -> dict:
     with open(path) as f:
         return yaml.safe_load(f)
 
-cfg = load_config()
 
-
-def find_project_root(marker: str = "pyproject.toml") -> Path:
+def _find_project_root(marker: str = "pyproject.toml") -> Path:
     """Walk up from this file until we find the marker."""
     current = Path(__file__).resolve().parent
     for parent in [current, *current.parents]:
@@ -38,41 +40,40 @@ def find_project_root(marker: str = "pyproject.toml") -> Path:
     )
 
 
-# ---------------------------------------------------------------------------
-# Paths
-# ---------------------------------------------------------------------------
-root_dir = Path(os.environ.get("PROJECT_ROOT", find_project_root()))
-H5_FILE    = root_dir / cfg["paths"]["h5_file"]
-SPLIT_FILE = root_dir / cfg["paths"]["split_file"]
-SAVE_DIR = root_dir / cfg["paths"]["save_dir"]
+def _resolve_paths(cfg: dict) -> tuple[Path, Path, Path]:
+    root_dir   = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
+    h5_file    = root_dir / cfg["paths"]["h5_file"]
+    split_file = root_dir / cfg["paths"]["split_file"]
+    save_dir   = root_dir / cfg["paths"]["save_dir"]
+    return h5_file, split_file, save_dir
+
+
+def _dsp_constants(cfg: dict) -> dict:
+    """Unpack DSP config into a plain dict passed explicitly to DSP functions."""
+    return dict(
+        fs_h      = cfg["dsp"]["band_fs"]["H"],
+        fs_l      = cfg["dsp"]["band_fs"]["L"],
+        nperseg   = cfg["dsp"]["welch"]["nperseg"],
+        noverlap  = cfg["dsp"]["welch"]["noverlap"],
+        nfft      = cfg["dsp"]["welch"]["nfft"],
+        window    = cfg["dsp"]["welch"]["window"],
+        stft_nperseg  = cfg["dsp"]["stft"]["nperseg"],
+        stft_noverlap = cfg["dsp"]["stft"]["noverlap"],
+    )
+
 
 # ---------------------------------------------------------------------------
-# DSP constants
+# Constants that are derived formulas, not config decisions — module-level OK
 # ---------------------------------------------------------------------------
-FS_H = cfg["dsp"]["band_fs"]["H"]
-FS_L = cfg["dsp"]["band_fs"]["L"]
-
-# Welch PSD
-NPERSEG  = cfg["dsp"]["welch"]["nperseg"]
-NOVERLAP = cfg["dsp"]["welch"]["noverlap"]
-NFFT     = cfg["dsp"]["welch"]["nfft"]
-WINDOW   = cfg["dsp"]["welch"]["window"]
-
-# STFT spectrogram (EDA only)
-STFT_NPERSEG  = cfg["dsp"]["stft"]["nperseg"]
-STFT_NOVERLAP = cfg["dsp"]["stft"]["noverlap"]
-
-# Derived — kept in code, not config (it's a formula, not a decision)
-N_FREQ_BINS = NFFT // 2 + 1   # 513
 
 SCALAR_NAMES = [
     "spectral_centroid", "spectral_bandwidth", "spectral_rolloff_85",
     "spectral_flatness",  "spectral_entropy",   "peak_freq", "snr_db",
 ]
-#%%
+
 
 # ---------------------------------------------------------------------------
-# 1.  IQ helpers
+# 1.  IQ helpers  (pure, no config dependency)
 # ---------------------------------------------------------------------------
 
 def deinterleave(x: np.ndarray) -> np.ndarray:
@@ -94,9 +95,10 @@ def deinterleave(x: np.ndarray) -> np.ndarray:
 def welch_psd(
     iq: np.ndarray,
     fs: float,
-    nperseg: int = NPERSEG,
-    noverlap: int = NOVERLAP,
-    nfft: int     = NFFT,
+    nperseg: int,
+    noverlap: int,
+    nfft: int,
+    window: str,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Two-sided Welch PSD of a complex IQ signal.
@@ -115,7 +117,7 @@ def welch_psd(
     """
     freqs, psd = scipy_signal.welch(
         iq, fs=fs,
-        window=WINDOW,
+        window=window,
         nperseg=nperseg,
         noverlap=noverlap,
         nfft=nfft,
@@ -134,9 +136,10 @@ def welch_psd(
 def stft_spectrogram(
     iq: np.ndarray,
     fs: float,
-    nperseg: int  = STFT_NPERSEG,
-    noverlap: int = STFT_NOVERLAP,
-    nfft: int     = NFFT,
+    nperseg: int,
+    noverlap: int,
+    nfft: int,
+    window: str,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     STFT magnitude spectrogram of a complex IQ signal.
@@ -154,7 +157,7 @@ def stft_spectrogram(
     """
     freqs, times, Zxx = scipy_signal.stft(
         iq, fs=fs,
-        window=WINDOW,
+        window=window,
         nperseg=nperseg,
         noverlap=noverlap,
         nfft=nfft,
@@ -167,8 +170,9 @@ def stft_spectrogram(
 
 
 # ---------------------------------------------------------------------------
-# 4.  Scalar features  (XGBoost input)
+# 4.  Scalar features  (XGBoost input — pure, no config dependency)
 # ---------------------------------------------------------------------------
+
 def spectral_scalars(freqs: np.ndarray, psd_db: np.ndarray) -> np.ndarray:
     """
     7 scalar features from a Welch PSD → shape (7,) float32.
@@ -199,9 +203,6 @@ def spectral_scalars(freqs: np.ndarray, psd_db: np.ndarray) -> np.ndarray:
     peak_freq = float(freqs[peak_idx])
     snr_db    = float(psd_db[peak_idx] - np.median(psd_db))
 
-    # Order is enforced here — SCALAR_NAMES is the single source of truth.
-    # Adding/reordering features: update the dict, SCALAR_NAMES stays in sync
-    # automatically. A KeyError fires immediately if names drift.
     features: dict[str, float] = {
         "spectral_centroid":    centroid,
         "spectral_bandwidth":   bandwidth,
@@ -220,16 +221,28 @@ def spectral_scalars(freqs: np.ndarray, psd_db: np.ndarray) -> np.ndarray:
 
     return np.array([features[k] for k in SCALAR_NAMES], dtype=np.float32)
 
+
+# ---------------------------------------------------------------------------
+# 5.  Main loader
+# ---------------------------------------------------------------------------
+
 def load_dataset(
     h5_path:    Path,
     split_path: Path,
+    dsp:        dict,
     band:       list      = ["H", "L"],
     max_segs:   int|None  = None,
-    save_dir:   Path|None = None,   # None = no save, Path = save to dir
-    save_psd:   bool      = False,  # expensive — only for EDA runs
-    ) -> dict:
+    save_dir:   Path|None = None,
+    save_psd:   bool      = False,
+) -> dict:
     """
     Load all segments for a given band, run DSP, return arrays.
+
+    Parameters
+    ----------
+    dsp : dict
+        DSP constants from _dsp_constants(cfg). Passed explicitly so this
+        function carries no hidden dependency on global config state.
 
     Returns dict:
       X_scalar : (N, 7)    float32  — XGBoost features
@@ -245,11 +258,11 @@ def load_dataset(
         {band}_psd.npz       — X_psd                (EDA only, if save_psd=True)
         {band}_meta.parquet  — meta + scalar columns (analysis)
     """
+    band_fs = {"H": dsp["fs_h"], "L": dsp["fs_l"]}
     splits  = json.loads(split_path.read_text())
     all_ids = set(splits["train"] + splits["val"] + splits["test"])
 
-    band_tag = "".join(sorted(band))              # e.g. "H", "L", "HL"
-    fs       = FS = {"H": FS_H, "L": FS_L}      # mixed-band: caller's responsibility
+    band_tag = "".join(sorted(band))
 
     X_scalar_list, X_psd_list, y_list, meta_list = [], [], [], []
     freqs_ref = None
@@ -267,9 +280,15 @@ def load_dataset(
 
             raw           = seg["signal"][:]
             iq            = deinterleave(raw)
-            fs            = FS[seg.attrs["band"]]
-            freqs, psd_db = welch_psd(iq, fs=fs)
-            scalars       = spectral_scalars(freqs, psd_db)
+            fs            = band_fs[seg.attrs["band"]]
+            freqs, psd_db = welch_psd(
+                iq, fs=fs,
+                nperseg=dsp["nperseg"],
+                noverlap=dsp["noverlap"],
+                nfft=dsp["nfft"],
+                window=dsp["window"],
+            )
+            scalars = spectral_scalars(freqs, psd_db)
 
             if freqs_ref is None:
                 freqs_ref = freqs
@@ -300,36 +319,22 @@ def load_dataset(
     X_psd    = np.array(X_psd_list,    dtype=np.float32) if save_psd else None
     y        = np.array(y_list,         dtype=np.int32)
 
-    # ------------------------------------------------------------------
-    # Persist features
-    # ------------------------------------------------------------------
     if save_dir is not None:
         save_dir = Path(save_dir)
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        # 1. Training input — npz (fast numpy-native load for XGBoost)
         scalars_path = save_dir / f"{band_tag}_scalars.npz"
-        np.savez_compressed(
-            scalars_path,
-            X_scalar=X_scalar,
-            y=y,
-            freqs=freqs_ref,
-        )
+        np.savez_compressed(scalars_path, X_scalar=X_scalar, y=y, freqs=freqs_ref)
         print(f"  → scalars : {scalars_path}")
 
-        # 2. PSD arrays — separate npz (EDA only, large, skip in training)
         if save_psd and X_psd is not None:
             psd_path = save_dir / f"{band_tag}_psd.npz"
             np.savez_compressed(psd_path, X_psd=X_psd)
             print(f"  → psd     : {psd_path}")
 
-        # 3. Meta + scalars — parquet (queryable, pandas-friendly, analysis)
-        meta_df = pd.DataFrame(meta_list)
-        scalar_df = pd.DataFrame(
-            X_scalar,
-            columns=SCALAR_NAMES,             # ["spectral_centroid", ...]
-        )
-        meta_df = pd.concat([meta_df, scalar_df], axis=1)
+        meta_df   = pd.DataFrame(meta_list)
+        scalar_df = pd.DataFrame(X_scalar, columns=SCALAR_NAMES)
+        meta_df   = pd.concat([meta_df, scalar_df], axis=1)
         meta_path = save_dir / f"{band_tag}_meta.parquet"
         meta_df.to_parquet(meta_path, index=False)
         print(f"  → meta    : {meta_path}")
@@ -343,9 +348,23 @@ def load_dataset(
         splits   = splits,
     )
 
-if __name__ == "__main__":
-    
 
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+def main() -> None:
+    # ── 1. Environment and config ──────────────────────────────────────────
+    load_dotenv()
+
+    root_dir = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
+    cfg      = _load_config(root_dir / "config/features.yaml")
+
+    # ── 2. Path and DSP resolution ─────────────────────────────────────────
+    h5_file, split_file, save_dir = _resolve_paths(cfg)
+    dsp = _dsp_constants(cfg)
+
+    # ── 3. CLI args ────────────────────────────────────────────────────────
     parser = argparse.ArgumentParser(description="Featurize DroneRF segments")
     parser.add_argument("--band",     default="H", choices=["H", "L"],
                         help="Band to process (default: H, 40 MHz)")
@@ -353,11 +372,17 @@ if __name__ == "__main__":
                         help="Load at most N segments (smoke-test only, omit for full run)")
     args = parser.parse_args()
 
+    # ── 4. Run ────────────────────────────────────────────────────────────
     load_dataset(
-        h5_path    = H5_FILE,
-        split_path = SPLIT_FILE,
+        h5_path    = h5_file,
+        split_path = split_file,
+        dsp        = dsp,
         band       = [args.band],
         max_segs   = args.max_segs,
-        save_dir   = SAVE_DIR,
+        save_dir   = save_dir,
         save_psd   = False,
     )
+
+
+if __name__ == "__main__":
+    main()
