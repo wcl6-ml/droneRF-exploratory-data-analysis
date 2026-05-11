@@ -30,6 +30,9 @@ Refactor notes (v3):
  
 import json
 import os
+import logging
+log = logging.getLogger(__name__)
+
 from pathlib import Path
  
 import h5py
@@ -61,15 +64,15 @@ def _find_project_root(marker: str = "pyproject.toml") -> Path:
     )
  
  
-def _resolve_paths(cfg: dict) -> tuple[Path, Path, Path, Path]:
+def _resolve_paths() -> tuple[Path, Path, Path, Path]:
     """
-    Derive root_dir, RAW_ROOT, OUT_FILE, SPLIT_FILE from env / config.
+    Derive root_dir, RAW_ROOT, DATA_OUT_FILE, SPLIT_FILE from env / config.
     Returns an explicit tuple so every caller names what it receives.
     """
     root_dir = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
  
     raw_root   = Path(os.getenv("RAW_ROOT")   or root_dir / "data/raw/DroneRF")
-    out_file   = Path(os.getenv("OUT_FILE")   or root_dir / "data/interim/dronerf.h5")
+    out_file   = Path(os.getenv("DATA_OUT_FILE")   or root_dir / "data/interim/dronerf.h5")
     split_file = Path(os.getenv("SPLIT_FILE") or root_dir / "data/interim/dronerf_splits.json")
  
     # Resolve relative paths against project root
@@ -117,16 +120,22 @@ def build_h5(raw_root: Path, out_file: Path, cfg: dict) -> None:
     out_file : Path
         Destination .h5 file (created; parent dirs made automatically).
     cfg : dict
-        Parsed data.yaml. Keys consumed:
-          cfg["dataset"]["segment_length"]
-          cfg["dataset"]["band_fs"]
-          cfg["dataset"]["bui_map"]
-          cfg["dataset"]["label_map"]
+        Parsed params.yaml. Keys consumed:
+          cfg["data_aggregator"]["segment_length"]
+          cfg["data_aggregator"]["band_fs"]
+          cfg["data_aggregator"]["bui_map"]
+          cfg["data_aggregator"]["label_map"]
     """
-    seg_len   = cfg["dataset"]["segment_length"]
-    band_fs   = cfg["dataset"]["band_fs"]
-    bui_map   = cfg["dataset"]["bui_map"]
-    label_map = cfg["dataset"]["label_map"]
+    if not raw_root.exists():
+        raise FileNotFoundError(f"Raw data not found: {raw_root}. Run `dvc pull`.")
+    csv_files = list(raw_root.rglob("*.csv"))
+    if not csv_files:
+        raise ValueError(f"No CSV files found under {raw_root}")
+    
+    seg_len   = cfg["data_aggregator"]["segment_length"]
+    band_fs   = cfg["data_aggregator"]["band_fs"]
+    bui_map   = cfg["data_aggregator"]["bui_map"]
+    label_map = cfg["data_aggregator"]["label_map"]
  
     out_file.parent.mkdir(parents=True, exist_ok=True)
     records = []
@@ -146,7 +155,7 @@ def build_h5(raw_root: Path, out_file: Path, cfg: dict) -> None:
         for bui, drone_type in tqdm(bui_map.items(), desc="BUI"):
             csv_files = sorted(raw_root.rglob(f"{bui}*.csv"))
             if not csv_files:
-                print(f"[WARN] No CSVs found for BUI {bui}")
+                log.warning("No CSVs found for BUI %s", bui)
                 continue
  
             for csv_path in csv_files:
@@ -233,10 +242,10 @@ def build_splits(meta_parquet: Path, split_file: Path, cfg: dict) -> None:
     split_file : Path
         Destination JSON file.
     cfg : dict
-        Parsed data.yaml. Keys consumed:
-          cfg["splits"]["test_frac"]
-          cfg["splits"]["val_frac"]
-          cfg["splits"]["random_seed"]
+        Parsed params.yaml. Keys consumed:
+          cfg["data_aggregator"]["splits"]["test_frac"]
+          cfg["data_aggregator"]["splits"]["val_frac"]
+          cfg["data_aggregator"]["splits"]["random_seed"]
  
     Splitting strategy
     ------------------
@@ -256,9 +265,9 @@ def build_splits(meta_parquet: Path, split_file: Path, cfg: dict) -> None:
       "meta":  { ... provenance ... }
     }
     """
-    test_frac   = cfg["splits"]["test_frac"]
-    val_frac    = cfg["splits"]["val_frac"]
-    random_seed = cfg["splits"]["random_seed"]
+    test_frac   = cfg["data_aggregator"]["splits"]["test_frac"]
+    val_frac    = cfg["data_aggregator"]["splits"]["val_frac"]
+    random_seed = cfg["data_aggregator"]["splits"]["random_seed"]
  
     df = pd.read_parquet(meta_parquet)
  
@@ -380,11 +389,16 @@ def main() -> None:
     from dotenv import load_dotenv
     load_dotenv()
  
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(name)s %(levelname)s %(message)s"
+    )
+    
     root_dir = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
-    cfg = _load_config(root_dir / "config/data.yaml")
+    cfg = _load_config(root_dir / "config/params.yaml")
  
     # ── 2. Path resolution ─────────────────────────────────────────────────
-    _, raw_root, out_file, split_file = _resolve_paths(cfg)
+    _, raw_root, out_file, split_file = _resolve_paths()
  
     # ── 3. Build HDF5 (idempotent) ─────────────────────────────────────────
 

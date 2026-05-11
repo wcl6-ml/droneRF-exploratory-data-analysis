@@ -1,0 +1,42 @@
+# YAML anchor defined once, aliased below
+_shared:
+  band_fs: &band_fs
+    H: 40_000_000.0
+    L: 10_000_000.0
+
+data_aggregator:
+  segment_length: 100_000
+  band_fs: *band_fs          # alias — no duplication
+  bui_map:
+    "00000": background
+    "10000": bebop
+    "10001": bebop
+    "10010": bebop
+    "10011": bebop
+    "10100": ar
+    "10101": ar
+    "10110": ar
+    "10111": ar
+    "11000": phantom
+
+  label_map:
+    background: 0
+    bebop: 1
+    ar: 2
+    phantom: 3
+
+  splits:
+    val_frac:    0.10
+    test_frac:   0.15
+    random_seed: 42
+
+featurize:
+  band_fs: *band_fs            # same anchor, single definition
+  welch:
+    nperseg:  1024
+    noverlap: 768
+    nfft:     1024
+    window:   hann
+  stft:
+    nperseg:  256
+    noverlap: 192

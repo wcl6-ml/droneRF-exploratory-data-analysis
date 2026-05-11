@@ -40,25 +40,26 @@ def _find_project_root(marker: str = "pyproject.toml") -> Path:
     )
 
 
-def _resolve_paths(cfg: dict) -> tuple[Path, Path, Path]:
+def _resolve_paths() -> tuple[Path, Path, Path]:
     root_dir   = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
-    h5_file    = root_dir / cfg["paths"]["h5_file"]
-    split_file = root_dir / cfg["paths"]["split_file"]
-    save_dir   = root_dir / cfg["paths"]["save_dir"]
+    h5_file    = Path(os.getenv("DATA_OUT_FILE")   or root_dir / "data/interim/dronerf.h5")
+    split_file = Path(os.getenv("SPLIT_FILE") or root_dir / "data/interim/dronerf_splits.json")
+    save_dir   = Path(os.getenv("FEATURE_OUT_FILE")   or root_dir / "data/processed/")
+
     return h5_file, split_file, save_dir
 
 
 def _dsp_constants(cfg: dict) -> dict:
     """Unpack DSP config into a plain dict passed explicitly to DSP functions."""
     return dict(
-        fs_h      = cfg["dsp"]["band_fs"]["H"],
-        fs_l      = cfg["dsp"]["band_fs"]["L"],
-        nperseg   = cfg["dsp"]["welch"]["nperseg"],
-        noverlap  = cfg["dsp"]["welch"]["noverlap"],
-        nfft      = cfg["dsp"]["welch"]["nfft"],
-        window    = cfg["dsp"]["welch"]["window"],
-        stft_nperseg  = cfg["dsp"]["stft"]["nperseg"],
-        stft_noverlap = cfg["dsp"]["stft"]["noverlap"],
+        fs_h      = cfg["featurize"]["band_fs"]["H"],
+        fs_l      = cfg["featurize"]["band_fs"]["L"],
+        nperseg   = cfg["featurize"]["welch"]["nperseg"],
+        noverlap  = cfg["featurize"]["welch"]["noverlap"],
+        nfft      = cfg["featurize"]["welch"]["nfft"],
+        window    = cfg["featurize"]["welch"]["window"],
+        stft_nperseg  = cfg["featurize"]["stft"]["nperseg"],
+        stft_noverlap = cfg["featurize"]["stft"]["noverlap"],
     )
 
 
@@ -271,6 +272,11 @@ def load_dataset(
     t0 = time.perf_counter()
 
     with h5py.File(h5_path, "r") as hf:
+        
+        assert hf.attrs.get("signal_format") == "interleaved_iq", \
+            "Unexpected signal_format — wrong H5 file?"
+        assert "segments" in hf, "H5 missing 'segments' group"
+        
         for key in tqdm(sorted(hf["segments"].keys())):
             if key not in all_ids:
                 continue
@@ -358,10 +364,10 @@ def main() -> None:
     load_dotenv()
 
     root_dir = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
-    cfg      = _load_config(root_dir / "config/features.yaml")
+    cfg      = _load_config(root_dir / "config/params.yaml")
 
     # ── 2. Path and DSP resolution ─────────────────────────────────────────
-    h5_file, split_file, save_dir = _resolve_paths(cfg)
+    h5_file, split_file, save_dir = _resolve_paths()
     dsp = _dsp_constants(cfg)
 
     # ── 3. CLI args ────────────────────────────────────────────────────────

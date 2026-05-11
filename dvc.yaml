@@ -4,7 +4,9 @@ stages:
     cmd: python src/data/data_aggregator.py
     deps:
       - src/data/data_aggregator.py
-      - config/data.yaml
+    params:
+      - config/params.yaml:
+          - data_aggregator        # DVC tracks only this subtree
     outs:
       - data/interim/dronerf.h5
       - data/interim/dronerf.meta.parquet
@@ -22,9 +24,8 @@ stages:
         - src/data/featurize.py
         - data/interim/dronerf.h5
       params:
-        - config/features.yaml:
-            - dsp
-            - paths
+        - config/params.yaml:
+            - featurize            # DVC tracks only this subtree
       outs:
         - data/processed/${item}_scalars.npz
         - data/processed/${item}_meta.parquet

@@ -3,14 +3,37 @@ stages:
   generate_data:
     cmd: python src/data/data_aggregator.py
     deps:
-    - path: config/data.yaml
-      hash: md5
-      md5: f5fbd7695ff47f7bf2914f140f5b53d3
-      size: 523
     - path: src/data/data_aggregator.py
       hash: md5
-      md5: e0de06477230f9087fa40bba1d23222a
-      size: 16865
+      md5: 644b91843dce2b88f3f9de4c6c740e77
+      size: 17477
+    params:
+      config/params.yaml:
+        data_aggregator:
+          segment_length: 100000
+          band_fs:
+            H: 40000000.0
+            L: 10000000.0
+          bui_map:
+            '00000': background
+            '10000': bebop
+            '10001': bebop
+            '10010': bebop
+            '10011': bebop
+            '10100': ar
+            '10101': ar
+            '10110': ar
+            '10111': ar
+            '11000': phantom
+          label_map:
+            background: 0
+            bebop: 1
+            ar: 2
+            phantom: 3
+          splits:
+            val_frac: 0.1
+            test_frac: 0.15
+            random_seed: 42
     outs:
     - path: data/interim/dronerf.h5
       hash: md5
@@ -33,11 +56,11 @@ stages:
       size: 4634087134
     - path: src/data/featurize.py
       hash: md5
-      md5: 4328b320f43489d7d0d3755b165d0a60
-      size: 14369
+      md5: 9ce1ad31d8bb297f989313cf22a7ec91
+      size: 14726
     params:
-      config/features.yaml:
-        dsp:
+      config/params.yaml:
+        featurize:
           band_fs:
             H: 40000000.0
             L: 10000000.0
@@ -49,10 +72,6 @@ stages:
           stft:
             nperseg: 256
             noverlap: 192
-        paths:
-          h5_file: data/interim/dronerf.h5
-          split_file: data/interim/dronerf_splits.json
-          save_dir: data/processed/
     outs:
     - path: data/processed/H_meta.parquet
       hash: md5
@@ -71,11 +90,11 @@ stages:
       size: 4634087134
     - path: src/data/featurize.py
       hash: md5
-      md5: 4328b320f43489d7d0d3755b165d0a60
-      size: 14369
+      md5: 9ce1ad31d8bb297f989313cf22a7ec91
+      size: 14726
     params:
-      config/features.yaml:
-        dsp:
+      config/params.yaml:
+        featurize:
           band_fs:
             H: 40000000.0
             L: 10000000.0
@@ -87,10 +106,6 @@ stages:
           stft:
             nperseg: 256
             noverlap: 192
-        paths:
-          h5_file: data/interim/dronerf.h5
-          split_file: data/interim/dronerf_splits.json
-          save_dir: data/processed/
     outs:
     - path: data/processed/L_meta.parquet
       hash: md5

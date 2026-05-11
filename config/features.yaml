@@ -1,8 +1,3 @@
-paths:
-  h5_file:    data/interim/dronerf.h5
-  split_file: data/interim/dronerf_splits.json
-  save_dir: data/processed/
-
 dsp:
   band_fs:
     H: 40_000_000.0          # 40 MHz USRP B210
