@@ -115,3 +115,48 @@ stages:
       hash: md5
       md5: bfa2095e6244d7055f35e531923a62fd
       size: 458753
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/interim/dronerf_splits.json
+      hash: md5
+      md5: ee08c9dd9b9f6154dcd29933d9cddf26
+      size: 590456
+    - path: data/processed/H_scalars.npz
+      hash: md5
+      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
+      size: 444554
+    - path: data/processed/L_scalars.npz
+      hash: md5
+      md5: bfa2095e6244d7055f35e531923a62fd
+      size: 458753
+    - path: src/train.py
+      hash: md5
+      md5: 235ba238453e65683e54cd5cdb04da5f
+      size: 11192
+    params:
+      config/params.yaml:
+        train:
+          mlflow_experiment: drone-detection
+          mlflow_run_name: xgb-multiclass
+          registered_model_name: drone-xgb
+          xgb:
+            num_class: 4
+            n_estimators: 300
+            max_depth: 8
+            learning_rate: 0.1
+            subsample: 0.8
+            colsample_bytree: 0.8
+            reg_alpha: 0.0
+            reg_lambda: 1.0
+            random_seed: 42
+            early_stopping_rounds: 20
+    outs:
+    - path: metrics/scores.json
+      hash: md5
+      md5: afad95a4a0a7e86257c18489ef61f1dd
+      size: 389
+    - path: models/xgb_drone.json
+      hash: md5
+      md5: 7a67f4df0f4bc676a6483fd2a1a81364
+      size: 12065934

@@ -40,3 +40,19 @@ featurize:
   stft:
     nperseg:  256
     noverlap: 192
+
+train:
+  mlflow_experiment:    drone-detection
+  mlflow_run_name:      xgb-multiclass
+  registered_model_name: drone-xgb
+  xgb:
+    num_class:             4
+    n_estimators:          300
+    max_depth:             8
+    learning_rate:         0.1
+    subsample:             0.8
+    colsample_bytree:      0.8
+    reg_alpha:             0.0
+    reg_lambda:            1.0
+    random_seed:           42
+    early_stopping_rounds: 20

@@ -31,18 +31,21 @@ stages:
         - data/processed/${item}_meta.parquet
 
 #  # ── Stage 3: Train ──────────────────────────────────────────────
-#  train:
-#    cmd: python src/train.py
-#    deps:
-#      - src/train.py
-#      - data/processed/features.csv  # if features didn't change → cached
-#    params:
-#      - train
-#    outs:
-#      - models/model.pkl
-#      - models/X_test.npy
-#      - models/y_test.npy
-#
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - data/processed/H_scalars.npz
+      - data/processed/L_scalars.npz
+      - data/interim/dronerf_splits.json
+    params:
+      - config/params.yaml:
+          - train
+    outs:
+      - models/xgb_drone.json
+    metrics:
+      - metrics/scores.json:
+          cache: false
 #  # ── Stage 4: Evaluate ───────────────────────────────────────────
 #  evaluate:
 #    cmd: python src/evaluate.py
