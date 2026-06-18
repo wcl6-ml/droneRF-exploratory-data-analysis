@@ -142,7 +142,7 @@ stages:
           registered_model_name: drone-xgb
           xgb:
             num_class: 4
-            n_estimators: 300
+            n_estimators: 500
             max_depth: 8
             learning_rate: 0.1
             subsample: 0.8
@@ -154,9 +154,9 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: afad95a4a0a7e86257c18489ef61f1dd
-      size: 389
+      md5: 40fdc71eb24ff01e4919f82a3c67716f
+      size: 341
     - path: models/xgb_drone.json
       hash: md5
-      md5: 7a67f4df0f4bc676a6483fd2a1a81364
-      size: 12065934
+      md5: d603b8076adbdbdda7fb76d89c690bcc
+      size: 18604106

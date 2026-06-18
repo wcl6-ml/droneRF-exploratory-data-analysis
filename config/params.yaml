@@ -1,23 +1,24 @@
 # YAML anchor defined once, aliased below
 _shared:
   band_fs: &band_fs
-    H: 40_000_000.0
-    L: 10_000_000.0
+    H: 0040000000.0
+    L: 0010000000.0
 
 data_aggregator:
   segment_length: 100_000
-  band_fs: *band_fs          # alias — no duplication
+  band_fs: *band_fs
+                             # alias — no duplication
   bui_map:
-    "00000": background
-    "10000": bebop
-    "10001": bebop
-    "10010": bebop
-    "10011": bebop
-    "10100": ar
-    "10101": ar
-    "10110": ar
-    "10111": ar
-    "11000": phantom
+    '00000': background
+    '10000': bebop
+    '10001': bebop
+    '10010': bebop
+    '10011': bebop
+    '10100': ar
+    '10101': ar
+    '10110': ar
+    '10111': ar
+    '11000': phantom
 
   label_map:
     background: 0
@@ -26,33 +27,34 @@ data_aggregator:
     phantom: 3
 
   splits:
-    val_frac:    0.10
-    test_frac:   0.15
+    val_frac: 0.10
+    test_frac: 0.15
     random_seed: 42
 
 featurize:
-  band_fs: *band_fs            # same anchor, single definition
+  band_fs: *band_fs
+                               # same anchor, single definition
   welch:
-    nperseg:  1024
+    nperseg: 1024
     noverlap: 768
-    nfft:     1024
-    window:   hann
+    nfft: 1024
+    window: hann
   stft:
-    nperseg:  256
+    nperseg: 256
     noverlap: 192
 
 train:
-  mlflow_experiment:    drone-detection
-  mlflow_run_name:      xgb-multiclass
+  mlflow_experiment: drone-detection
+  mlflow_run_name: xgb-multiclass
   registered_model_name: drone-xgb
   xgb:
-    num_class:             4
-    n_estimators:          300
-    max_depth:             8
-    learning_rate:         0.1
-    subsample:             0.8
-    colsample_bytree:      0.8
-    reg_alpha:             0.0
-    reg_lambda:            1.0
-    random_seed:           42
+    num_class: 4
+    n_estimators: 500
+    max_depth: 8
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+    random_seed: 42
     early_stopping_rounds: 20
