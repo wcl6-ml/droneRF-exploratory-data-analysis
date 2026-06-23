@@ -35,6 +35,7 @@ stages:
     cmd: python src/train.py
     deps:
       - src/train.py
+      - src/model.py
       - data/processed/H_scalars.npz
       - data/processed/L_scalars.npz
       - data/interim/dronerf_splits.json
@@ -42,9 +43,23 @@ stages:
       - config/params.yaml:
           - train
     outs:
-      - models/xgb_drone.json
+      - models/model.onnx
+      - models/model.pt
+      - models/scaler.json
     metrics:
       - metrics/scores.json:
+          cache: false
+ 
+  eval_onnx:
+    cmd: python src/eval_onnx.py
+    deps:
+      - src/eval_onnx.py
+      - models/model.onnx
+      - models/scaler.json
+      - data/processed/H_scalars.npz
+      - data/processed/L_scalars.npz
+    metrics:
+      - metrics/onnx_scores.json:
           cache: false
 #  # ── Stage 4: Evaluate ───────────────────────────────────────────
 #  evaluate:

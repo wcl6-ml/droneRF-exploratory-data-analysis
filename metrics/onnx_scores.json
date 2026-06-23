@@ -1,0 +1,11 @@
+{
+  "test": {
+    "accuracy": 0.767533,
+    "f1_macro": 0.807108,
+    "f1_weighted": 0.764953,
+    "f1_background": 0.920476,
+    "f1_bebop": 0.696664,
+    "f1_ar": 0.725796,
+    "f1_phantom": 0.885496
+  }
+}

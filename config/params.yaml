@@ -44,17 +44,14 @@ featurize:
     noverlap: 192
 
 train:
-  mlflow_experiment: drone-detection
-  mlflow_run_name: xgb-multiclass
-  registered_model_name: drone-xgb
-  xgb:
-    num_class: 4
-    n_estimators: 500
-    max_depth: 8
-    learning_rate: 0.1
-    subsample: 0.8
-    colsample_bytree: 0.8
-    reg_alpha: 0.0
-    reg_lambda: 1.0
-    random_seed: 42
-    early_stopping_rounds: 20
+  mlflow_experiment:      drone-detection
+  mlflow_run_name:        cnn1d-scalars
+  registered_model_name:  drone-cnn1d
+  cnn1d:
+    num_filters:  64        # base channel width; block2/3 use num_filters*2
+    kernel_size:  3         # Conv1d kernel; padding=kernel_size//2 keeps length=14
+    dropout:      0.3
+    lr:           0.001
+    weight_decay: 0.0001
+    batch_size:   256
+    epochs:       50

@@ -4,3 +4,4 @@
     url = /workspaces/project/dvc-local
 ['remote "s3_remote"']
     url = s3://test-dronerf
+    region = ap-southeast-2
