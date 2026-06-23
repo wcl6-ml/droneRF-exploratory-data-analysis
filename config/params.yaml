@@ -1,23 +1,24 @@
 # YAML anchor defined once, aliased below
 _shared:
   band_fs: &band_fs
-    H: 40_000_000.0
-    L: 10_000_000.0
+    H: 0040000000.0
+    L: 0010000000.0
 
 data_aggregator:
   segment_length: 100_000
-  band_fs: *band_fs          # alias — no duplication
+  band_fs: *band_fs
+                             # alias — no duplication
   bui_map:
-    "00000": background
-    "10000": bebop
-    "10001": bebop
-    "10010": bebop
-    "10011": bebop
-    "10100": ar
-    "10101": ar
-    "10110": ar
-    "10111": ar
-    "11000": phantom
+    '00000': background
+    '10000': bebop
+    '10001': bebop
+    '10010': bebop
+    '10011': bebop
+    '10100': ar
+    '10101': ar
+    '10110': ar
+    '10111': ar
+    '11000': phantom
 
   label_map:
     background: 0
@@ -26,17 +27,31 @@ data_aggregator:
     phantom: 3
 
   splits:
-    val_frac:    0.10
-    test_frac:   0.15
+    val_frac: 0.10
+    test_frac: 0.15
     random_seed: 42
 
 featurize:
-  band_fs: *band_fs            # same anchor, single definition
+  band_fs: *band_fs
+                               # same anchor, single definition
   welch:
-    nperseg:  1024
+    nperseg: 1024
     noverlap: 768
-    nfft:     1024
-    window:   hann
+    nfft: 1024
+    window: hann
   stft:
-    nperseg:  256
+    nperseg: 256
     noverlap: 192
+
+train:
+  mlflow_experiment:      drone-detection
+  mlflow_run_name:        cnn1d-scalars
+  registered_model_name:  drone-cnn1d
+  cnn1d:
+    num_filters:  64        # base channel width; block2/3 use num_filters*2
+    kernel_size:  3         # Conv1d kernel; padding=kernel_size//2 keeps length=14
+    dropout:      0.3
+    lr:           0.001
+    weight_decay: 0.0001
+    batch_size:   256
+    epochs:       50

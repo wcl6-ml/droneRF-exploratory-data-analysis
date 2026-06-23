@@ -115,3 +115,85 @@ stages:
       hash: md5
       md5: bfa2095e6244d7055f35e531923a62fd
       size: 458753
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/interim/dronerf_splits.json
+      hash: md5
+      md5: ee08c9dd9b9f6154dcd29933d9cddf26
+      size: 590456
+    - path: data/processed/H_scalars.npz
+      hash: md5
+      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
+      size: 444554
+    - path: data/processed/L_scalars.npz
+      hash: md5
+      md5: bfa2095e6244d7055f35e531923a62fd
+      size: 458753
+    - path: src/model.py
+      hash: md5
+      md5: 38b8f008dc0ed8bd2dfd542c12d00392
+      size: 2884
+    - path: src/train.py
+      hash: md5
+      md5: 14c14c54a6ba3f1b5b9ebf397f5d0a39
+      size: 14004
+    params:
+      config/params.yaml:
+        train:
+          mlflow_experiment: drone-detection
+          mlflow_run_name: cnn1d-scalars
+          registered_model_name: drone-cnn1d
+          cnn1d:
+            num_filters: 64
+            kernel_size: 3
+            dropout: 0.3
+            lr: 0.001
+            weight_decay: 0.0001
+            batch_size: 256
+            epochs: 50
+    outs:
+    - path: metrics/scores.json
+      hash: md5
+      md5: 54bb07143538f71fcf7d23a94eaf3827
+      size: 411
+    - path: models/model.onnx
+      hash: md5
+      md5: 29798d814697aa58020fe61df6bdb48e
+      size: 15316
+    - path: models/model.pt
+      hash: md5
+      md5: 0334dc425b791d824c5b001b2418196c
+      size: 343706
+    - path: models/scaler.json
+      hash: md5
+      md5: ae8753ba6713a241843496b860fcb93b
+      size: 439
+  eval_onnx:
+    cmd: python src/eval_onnx.py
+    deps:
+    - path: data/processed/H_scalars.npz
+      hash: md5
+      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
+      size: 444554
+    - path: data/processed/L_scalars.npz
+      hash: md5
+      md5: bfa2095e6244d7055f35e531923a62fd
+      size: 458753
+    - path: models/model.onnx
+      hash: md5
+      md5: 29798d814697aa58020fe61df6bdb48e
+      size: 15316
+    - path: models/scaler.json
+      hash: md5
+      md5: ae8753ba6713a241843496b860fcb93b
+      size: 439
+    - path: src/eval_onnx.py
+      hash: md5
+      md5: 8a73cb1e29633170ae2113505798afb8
+      size: 6881
+    outs:
+    - path: metrics/onnx_scores.json
+      hash: md5
+      md5: 6e22f9c59d974c9d56011c45744362f7
+      size: 207

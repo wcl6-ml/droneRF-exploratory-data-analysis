@@ -8,9 +8,19 @@ data/*
 dvc-local
 # Environment variable
 .env
+# model
+models/*
+
+# mlflows
+mlruns/*
+mlflow*
 
 # archive
 archive/
 reports/
 tmp/
 study/
+
+# log
+log/*
+
