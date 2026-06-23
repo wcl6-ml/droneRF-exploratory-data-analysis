@@ -19,7 +19,8 @@ dependencies = [
     "pyyaml",
     "psycopg2-binary",
     "xgboost",
-    "dvc[s3]"
+    "dvc[s3]",
+    "onnxruntime==1.18.0"
 ]
 
 [project.optional-dependencies]
