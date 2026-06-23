@@ -1,5 +1,5 @@
 [core]
-    remote = s3_remote
+    remote = local_remote
 ['remote "local_remote"']
     url = /workspaces/project/dvc-local
 ['remote "s3_remote"']
