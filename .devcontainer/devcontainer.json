@@ -7,6 +7,16 @@
 //  ],
   "remoteUser": "vscode",
   "postCreateCommand": "chmod +x scripts/setup & scripts/setup",
+//"postCreateCommand": "chmod +x scripts/setup && scripts/setup && chmod +x scripts/install_torch.sh && scripts/install_torch.sh"
 
-  //"postCreateCommand": "chmod +x scripts/setup && scripts/setup && chmod +x scripts/install_torch.sh && scripts/install_torch.sh"
+  // Setup extensions for VS Code inside the container
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",          // Core Python support (debugging, linting, formatting)
+        "ms-toolsai.jupyter",        // Jupyter notebook rendering and engine
+        "ms-python.vscode-pylance"   // Fast, feature-rich language support for Python
+      ]
+    }
+  }
 }

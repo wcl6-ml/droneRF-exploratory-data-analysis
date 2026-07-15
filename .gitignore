@@ -24,3 +24,5 @@ study/
 # log
 log/*
 
+# vscode
+.vscode/*
