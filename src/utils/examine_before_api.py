@@ -95,6 +95,8 @@ def inspect_scaler(scaler_path: Path) -> None:
         raise ValueError(f"mean/std shape mismatch: {mean.shape} vs {std.shape}")
 
     print(f"  feature_count: {mean.shape[0]}")
+    assert mean.shape == std.shape
+    print(f"  mean and std shape: {mean.shape}")
     print(f"  mean_sample: {mean[:5].tolist()}")
     print(f"  std_sample:  {std[:5].tolist()}")
 
