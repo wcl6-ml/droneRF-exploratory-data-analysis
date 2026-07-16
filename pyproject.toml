@@ -9,7 +9,7 @@ description = "PhD to MLOps transition project"
 requires-python = ">=3.10"
 # Base dependencies required for BOTH training and serving
 dependencies = [
-    "numpy",
+    "numpy<2",
     "h5py",
     "pandas",
     "scikit-learn",

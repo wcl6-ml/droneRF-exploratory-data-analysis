@@ -155,15 +155,15 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: 54bb07143538f71fcf7d23a94eaf3827
-      size: 411
+      md5: 0101345f36996ea5b3e63312428ce923
+      size: 409
     - path: models/model.onnx
       hash: md5
-      md5: 29798d814697aa58020fe61df6bdb48e
-      size: 15316
+      md5: e151ddee60aa014e49b73256d26fa43a
+      size: 15296
     - path: models/model.pt
       hash: md5
-      md5: 0334dc425b791d824c5b001b2418196c
+      md5: 991972572a3745d899bc9865067ec72a
       size: 343706
     - path: models/scaler.json
       hash: md5
@@ -182,8 +182,8 @@ stages:
       size: 458753
     - path: models/model.onnx
       hash: md5
-      md5: 29798d814697aa58020fe61df6bdb48e
-      size: 15316
+      md5: e151ddee60aa014e49b73256d26fa43a
+      size: 15296
     - path: models/scaler.json
       hash: md5
       md5: ae8753ba6713a241843496b860fcb93b
@@ -195,5 +195,5 @@ stages:
     outs:
     - path: metrics/onnx_scores.json
       hash: md5
-      md5: 6e22f9c59d974c9d56011c45744362f7
-      size: 207
+      md5: 4eff63571ef61c0a2b8496a95978545d
+      size: 206
