@@ -20,6 +20,7 @@ archive/
 reports/
 tmp/
 study/
+prompts/
 
 # log
 log/*
