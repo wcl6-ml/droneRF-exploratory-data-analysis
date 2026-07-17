@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from sklearn.metrics import accuracy_score, classification_report, f1_score
 from torch.utils.data import DataLoader, TensorDataset
 
-from model import DroneCNN1dClassifier
+from models.model import DroneCNN1dClassifier
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

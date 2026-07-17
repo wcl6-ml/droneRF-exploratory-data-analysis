@@ -32,10 +32,10 @@ stages:
 
 #  # ── Stage 3: Train ──────────────────────────────────────────────
   train:
-    cmd: python src/train.py
+    cmd: python src/train/train.py
     deps:
-      - src/train.py
-      - src/model.py
+      - src/train/train.py
+      - src/models/model.py
       - data/processed/H_scalars.npz
       - data/processed/L_scalars.npz
       - data/interim/dronerf_splits.json
@@ -51,9 +51,9 @@ stages:
           cache: false
  
   eval_onnx:
-    cmd: python src/eval_onnx.py
+    cmd: python src/train/eval_onnx.py
     deps:
-      - src/eval_onnx.py
+      - src/train/eval_onnx.py
       - models/model.onnx
       - models/scaler.json
       - data/processed/H_scalars.npz
