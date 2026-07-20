@@ -4,6 +4,8 @@ train.py — CNN1d trainer for DroneRF scalar features
 Pipeline position:  featurize (H + L) → train → model.onnx + metrics/scores.json
 Input:              data/processed/H_scalars.npz
                     data/processed/L_scalars.npz
+                    data/processed/H_psd.npz
+                    data/processed/L_psd.npz
 Output:             models/model.onnx          (deployment artifact, DVC tracked)
                     models/model.pt            (checkpoint, DVC tracked)
                     models/scaler.json         (normalisation stats, DVC tracked)
@@ -59,8 +61,10 @@ def _resolve_paths(root_dir: Path) -> dict:
     model_dir   = Path(os.getenv("MODEL_DIR")        or root_dir / "models")
     metrics_dir = Path(os.getenv("METRICS_DIR")      or root_dir / "metrics")
     return dict(
-        h_scalars  = processed / "H_scalars.npz",
-        l_scalars  = processed / "L_scalars.npz",
+        h_scalar  = processed / "H_scalar.npz",
+        l_scalar  = processed / "L_scalar.npz",
+        h_psd  = processed / "H_psd.npz",
+        l_psd  = processed / "L_psd.npz",
         splits     = Path(os.getenv("SPLIT_FILE") or root_dir / "data/interim/dronerf_splits.json"),
         model_dir  = model_dir,
         model_pt   = model_dir / "model.pt",
@@ -78,6 +82,7 @@ def _load_split(
     h_path: Path,
     l_path: Path,
     split:  str,
+    data_used: str,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Load H and L scalars, hstack to (N, 14), return (X, y).
@@ -87,8 +92,8 @@ def _load_split(
     h = np.load(h_path, allow_pickle=False)
     l = np.load(l_path, allow_pickle=False)
 
-    X_h, y_h = h["X_scalar"], h["y"]
-    X_l, y_l = l["X_scalar"], l["y"]
+    X_h, y_h = h[f"X_{data_used}"], h["y"]
+    X_l, y_l = l[f"X_{data_used}"], l["y"]
 
     assert len(X_h) == len(X_l), (
         f"H/L row count mismatch for split='{split}': {len(X_h)} vs {len(X_l)}"
@@ -188,6 +193,7 @@ def main() -> None:
     cfg         = _load_config(root_dir / "config/params.yaml")
     paths       = _resolve_paths(root_dir)
     train_cfg   = cfg["train"]
+    data_used = train_cfg.get("data_used", "scalars")
     cnn_params  = train_cfg["cnn1d"]
 
     label_map   = cfg["data_aggregator"]["label_map"]
@@ -198,10 +204,10 @@ def main() -> None:
     print(f"Device: {device}")
 
     # ── 2. Data ─────────────────────────────────────────────────────────────
-    print("Loading scalars …")
-    X_train, y_train = _load_split(paths["h_scalars"], paths["l_scalars"], "train")
-    X_val,   y_val   = _load_split(paths["h_scalars"], paths["l_scalars"], "val")
-    X_test,  y_test  = _load_split(paths["h_scalars"], paths["l_scalars"], "test")
+    print(f"Loading {data_used} …")
+    X_train, y_train = _load_split(paths[f"h_{data_used}"], paths[f"l_{data_used}"], "train", data_used)
+    X_val,   y_val   = _load_split(paths[f"h_{data_used}"], paths[f"l_{data_used}"], "val", data_used)
+    X_test,  y_test  = _load_split(paths[f"h_{data_used}"], paths[f"l_{data_used}"], "test", data_used)
 
     mean, std = _fit_scaler(X_train)
     X_train   = _apply_scaler(X_train, mean, std)

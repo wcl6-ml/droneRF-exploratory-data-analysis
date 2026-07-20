@@ -47,6 +47,7 @@ train:
   mlflow_experiment:      drone-detection
   mlflow_run_name:        cnn1d-scalars
   registered_model_name:  drone-cnn1d
+  data_used:              scalar # psd (better f1-score) or scalar (for faster iteration)
   cnn1d:
     num_filters:  64        # base channel width; block2/3 use num_filters*2
     kernel_size:  3         # Conv1d kernel; padding=kernel_size//2 keeps length=14

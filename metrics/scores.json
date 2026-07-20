@@ -1,20 +1,20 @@
 {
   "val": {
-    "accuracy": 0.770661,
-    "f1_macro": 0.810585,
-    "f1_weighted": 0.76878,
-    "f1_background": 0.925777,
-    "f1_bebop": 0.702383,
-    "f1_ar": 0.727636,
-    "f1_phantom": 0.886544
+    "accuracy": 0.767048,
+    "f1_macro": 0.807198,
+    "f1_weighted": 0.764538,
+    "f1_background": 0.92756,
+    "f1_bebop": 0.691199,
+    "f1_ar": 0.727481,
+    "f1_phantom": 0.882555
   },
   "test": {
-    "accuracy": 0.770661,
-    "f1_macro": 0.810585,
-    "f1_weighted": 0.76878,
-    "f1_background": 0.925777,
-    "f1_bebop": 0.702383,
-    "f1_ar": 0.727636,
-    "f1_phantom": 0.886544
+    "accuracy": 0.767048,
+    "f1_macro": 0.807198,
+    "f1_weighted": 0.764538,
+    "f1_background": 0.92756,
+    "f1_bebop": 0.691199,
+    "f1_ar": 0.727481,
+    "f1_phantom": 0.882555
   }
 }
