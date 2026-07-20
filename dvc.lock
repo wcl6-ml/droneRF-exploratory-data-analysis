@@ -56,8 +56,8 @@ stages:
       size: 4634087134
     - path: src/data/featurize.py
       hash: md5
-      md5: 9ce1ad31d8bb297f989313cf22a7ec91
-      size: 14726
+      md5: 715bcb6d1139c05bbd83e3054b79de87
+      size: 14745
     params:
       config/params.yaml:
         featurize:
@@ -75,12 +75,12 @@ stages:
     outs:
     - path: data/processed/H_meta.parquet
       hash: md5
-      md5: 8507974e189e68563bca253ca8e37bf0
-      size: 970985
-    - path: data/processed/H_scalars.npz
+      md5: ed2be26dc842bf78a522903eafdbe730
+      size: 971037
+    - path: data/processed/H_scalar.npz
       hash: md5
-      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
-      size: 444554
+      md5: 7da93e13ddcaa8d5fce9ef7d57f73ca3
+      size: 444576
   featurize@L:
     cmd: python src/data/featurize.py --band L
     deps:
@@ -90,8 +90,8 @@ stages:
       size: 4634087134
     - path: src/data/featurize.py
       hash: md5
-      md5: 9ce1ad31d8bb297f989313cf22a7ec91
-      size: 14726
+      md5: 715bcb6d1139c05bbd83e3054b79de87
+      size: 14745
     params:
       config/params.yaml:
         featurize:
@@ -109,12 +109,12 @@ stages:
     outs:
     - path: data/processed/L_meta.parquet
       hash: md5
-      md5: c172ee96bdf41db478769da5aad0f2b0
-      size: 987404
-    - path: data/processed/L_scalars.npz
+      md5: e53efde66cfa6493f1859691cfb76337
+      size: 987452
+    - path: data/processed/L_scalar.npz
       hash: md5
-      md5: bfa2095e6244d7055f35e531923a62fd
-      size: 458753
+      md5: 4ff14fe6a877a79fa9cb915246956389
+      size: 458766
   train:
     cmd: python src/train/train.py
     deps:
@@ -122,28 +122,29 @@ stages:
       hash: md5
       md5: ee08c9dd9b9f6154dcd29933d9cddf26
       size: 590456
-    - path: data/processed/H_scalars.npz
+    - path: data/processed/H_scalar.npz
       hash: md5
-      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
-      size: 444554
-    - path: data/processed/L_scalars.npz
+      md5: 7da93e13ddcaa8d5fce9ef7d57f73ca3
+      size: 444576
+    - path: data/processed/L_scalar.npz
       hash: md5
-      md5: bfa2095e6244d7055f35e531923a62fd
-      size: 458753
+      md5: 4ff14fe6a877a79fa9cb915246956389
+      size: 458766
     - path: src/models/model.py
       hash: md5
       md5: 38b8f008dc0ed8bd2dfd542c12d00392
       size: 2884
     - path: src/train/train.py
       hash: md5
-      md5: 24415c2fbe9980667b9d8718c76d19f1
-      size: 14011
+      md5: 0dbd8ccdb4b93a6a866716620f49f832
+      size: 14335
     params:
       config/params.yaml:
         train:
           mlflow_experiment: drone-detection
           mlflow_run_name: cnn1d-scalars
           registered_model_name: drone-cnn1d
+          data_used: scalar
           cnn1d:
             num_filters: 64
             kernel_size: 3
@@ -155,45 +156,45 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: 177b00f1ee07156774b69a56aa848a44
+      md5: a1ccdb78ee1c173df1294632024f1d39
       size: 409
     - path: models/model.onnx
       hash: md5
-      md5: 626664b30d0a19d7ffe029094c8c0c0c
+      md5: 902baed2d2c078559f2fa4403a218439
       size: 15508
     - path: models/model.pt
       hash: md5
-      md5: 2cdede53dca741c7021424573529f593
+      md5: e0c9fd8507489188f8884bc0b4ca5f44
       size: 343706
     - path: models/scaler.json
       hash: md5
-      md5: ae8753ba6713a241843496b860fcb93b
-      size: 439
+      md5: 8bda79eeb10435b9d690e3e4b4f530dc
+      size: 440
   eval_onnx:
     cmd: python src/train/eval_onnx.py
     deps:
-    - path: data/processed/H_scalars.npz
+    - path: data/processed/H_scalar.npz
       hash: md5
-      md5: eb68f30a4a1a4a5cf7b5ea5bda2f416e
-      size: 444554
-    - path: data/processed/L_scalars.npz
+      md5: 7da93e13ddcaa8d5fce9ef7d57f73ca3
+      size: 444576
+    - path: data/processed/L_scalar.npz
       hash: md5
-      md5: bfa2095e6244d7055f35e531923a62fd
-      size: 458753
+      md5: 4ff14fe6a877a79fa9cb915246956389
+      size: 458766
     - path: models/model.onnx
       hash: md5
-      md5: 626664b30d0a19d7ffe029094c8c0c0c
+      md5: 902baed2d2c078559f2fa4403a218439
       size: 15508
     - path: models/scaler.json
       hash: md5
-      md5: ae8753ba6713a241843496b860fcb93b
-      size: 439
+      md5: 8bda79eeb10435b9d690e3e4b4f530dc
+      size: 440
     - path: src/train/eval_onnx.py
       hash: md5
-      md5: 8a73cb1e29633170ae2113505798afb8
-      size: 6881
+      md5: 3fdaeaa28216700950b3121105f88e82
+      size: 7100
     outs:
     - path: metrics/onnx_scores.json
       hash: md5
-      md5: 88692128190bf60c06c1b6a4ad57c9df
+      md5: 560a442cd725f78ea47c52a33ecaef18
       size: 206

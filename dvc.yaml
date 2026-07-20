@@ -27,7 +27,7 @@ stages:
         - config/params.yaml:
             - featurize            # DVC tracks only this subtree
       outs:
-        - data/processed/${item}_scalars.npz
+        - data/processed/${item}_scalar.npz
         - data/processed/${item}_meta.parquet
 
 #  # ── Stage 3: Train ──────────────────────────────────────────────
@@ -36,8 +36,8 @@ stages:
     deps:
       - src/train/train.py
       - src/models/model.py
-      - data/processed/H_scalars.npz
-      - data/processed/L_scalars.npz
+      - data/processed/H_scalar.npz
+      - data/processed/L_scalar.npz
       - data/interim/dronerf_splits.json
     params:
       - config/params.yaml:
@@ -56,8 +56,8 @@ stages:
       - src/train/eval_onnx.py
       - models/model.onnx
       - models/scaler.json
-      - data/processed/H_scalars.npz
-      - data/processed/L_scalars.npz
+      - data/processed/H_scalar.npz
+      - data/processed/L_scalar.npz
     metrics:
       - metrics/onnx_scores.json:
           cache: false

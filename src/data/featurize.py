@@ -255,7 +255,7 @@ def load_dataset(
 
     Saved layout (if save_dir is set):
       {save_dir}/
-        {band}_scalars.npz   — X_scalar, y, freqs   (training input)
+        {band}_scalar.npz   — X_scalar, y, freqs   (training input)
         {band}_psd.npz       — X_psd                (EDA only, if save_psd=True)
         {band}_meta.parquet  — meta + scalar columns (analysis)
     """
@@ -329,13 +329,13 @@ def load_dataset(
         save_dir = Path(save_dir)
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        scalars_path = save_dir / f"{band_tag}_scalars.npz"
+        scalars_path = save_dir / f"{band_tag}_scalar.npz"
         np.savez_compressed(scalars_path, X_scalar=X_scalar, y=y, freqs=freqs_ref)
         print(f"  → scalars : {scalars_path}")
 
         if save_psd and X_psd is not None:
             psd_path = save_dir / f"{band_tag}_psd.npz"
-            np.savez_compressed(psd_path, X_psd=X_psd)
+            np.savez_compressed(psd_path, X_psd=X_psd, y=y, freqs=freqs_ref)
             print(f"  → psd     : {psd_path}")
 
         meta_df   = pd.DataFrame(meta_list)
@@ -386,7 +386,7 @@ def main() -> None:
         band       = [args.band],
         max_segs   = args.max_segs,
         save_dir   = save_dir,
-        save_psd   = False,
+        save_psd   = True,
     )
 
 

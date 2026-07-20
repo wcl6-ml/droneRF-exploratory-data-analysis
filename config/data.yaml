@@ -1,8 +1,8 @@
 dataset:
   segment_length: 100000      # L — samples per segment (MATLAB: L = 1e5)
   band_fs:
-    H: 40_000_000.0           # 40 MHz USRP B210
-    L: 10_000_000.0           # 10 MHz USRP B210
+    H: 40_000_000.0           # 40 MHz USRP B210, configured in the origianl paper
+    L: 10_000_000.0           # 10 MHz USRP B210, configured in the origianl paper
 
   bui_map:
     "00000": background

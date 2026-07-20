@@ -49,8 +49,10 @@ def _resolve_paths(root_dir: Path) -> dict:
     model_dir   = Path(os.getenv("MODEL_DIR")        or root_dir / "models")
     metrics_dir = Path(os.getenv("METRICS_DIR")      or root_dir / "metrics")
     return dict(
-        h_scalars    = processed / "H_scalars.npz",
-        l_scalars    = processed / "L_scalars.npz",
+        h_scalar    = processed / "H_scalar.npz",
+        l_scalar    = processed / "L_scalar.npz",
+        h_psd  = processed / "H_psd.npz",
+        l_psd  = processed / "L_psd.npz",
         model_onnx   = model_dir / "model.onnx",
         scaler       = model_dir / "scaler.json",
         scores       = metrics_dir / "scores.json",        # PyTorch baseline
@@ -58,10 +60,10 @@ def _resolve_paths(root_dir: Path) -> dict:
     )
 
 
-def _load_test_split(h_path: Path, l_path: Path) -> tuple[np.ndarray, np.ndarray]:
+def _load_test_split(h_path: Path, l_path: Path, data_used: str) -> tuple[np.ndarray, np.ndarray]:
     h = np.load(h_path, allow_pickle=False)
     l = np.load(l_path, allow_pickle=False)
-    X = np.hstack([h["X_scalar"], l["X_scalar"]]).astype(np.float32)
+    X = np.hstack([h[f"X_{data_used}"], l[f"X_{data_used}"]]).astype(np.float32)
     y = h["y"].astype(np.int64)
     return X, y
 
@@ -117,14 +119,16 @@ def main() -> None:
 
     root_dir    = Path(os.environ.get("PROJECT_ROOT", _find_project_root()))
     cfg         = _load_config(root_dir / "config/params.yaml")
+    train_cfg   = cfg["train"]
+    data_used = train_cfg.get("data_used", "scalars")
     paths       = _resolve_paths(root_dir)
 
     label_map   = cfg["data_aggregator"]["label_map"]
     label_names = [k for k, _ in sorted(label_map.items(), key=lambda kv: kv[1])]
 
     # ── 1. Load + normalise test split ──────────────────────────────────────
-    print("Loading test scalars …")
-    X_test, y_test = _load_test_split(paths["h_scalars"], paths["l_scalars"])
+    print(f"Loading test {data_used} …")
+    X_test, y_test = _load_test_split(paths[f"h_{data_used}"], paths[f"l_{data_used}"], data_used)
     X_test = _apply_scaler(X_test, paths["scaler"])
     # Reshape flat (N, 14) → (N, 1, 14) to match CNN1d ONNX input shape
     X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
