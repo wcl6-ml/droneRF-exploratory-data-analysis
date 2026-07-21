@@ -2,7 +2,7 @@
 _shared:
   band_fs: &band_fs
     H: 0040000000.0
-    L: 0010000000.0
+    L: 0040000000.0
 
 data_aggregator:
   segment_length: 100_000
