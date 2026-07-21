@@ -19,8 +19,9 @@ mlflow*
 archive/
 reports/
 tmp/
-study/
+#study/
 prompts/*
+spyder/
 
 # log
 log/*
