@@ -121,7 +121,7 @@ class DroneRFPredictor:
         scalars_l = self._extract_spectral_scalars(freqs_l, psd_l)
 
         # 3. Concatenate bands to build the flat 14-element row (H_scalars + L_scalars)
-        X_flat = np.hstack([psd_h, psd_l]).astype(np.float32)
+        X_flat = np.hstack([scalars_h, scalars_l]).astype(np.float32)
         X_len = X_flat.shape[-1]
 
         # 4. Apply Z-score transformation: (X - mean) / std
