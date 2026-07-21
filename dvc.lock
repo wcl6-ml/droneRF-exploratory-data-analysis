@@ -13,7 +13,7 @@ stages:
           segment_length: 100000
           band_fs:
             H: 40000000.0
-            L: 10000000.0
+            L: 40000000.0
           bui_map:
             '00000': background
             '10000': bebop
@@ -37,12 +37,12 @@ stages:
     outs:
     - path: data/interim/dronerf.h5
       hash: md5
-      md5: be15cb2915ef1444b67dc6b99694de2f
+      md5: ebe5ce808e7dd1ff8e6e5739f1125c9c
       size: 4634087134
     - path: data/interim/dronerf.meta.parquet
       hash: md5
-      md5: a76a4290eae86bb86b9edeb732890b8f
-      size: 492869
+      md5: 0cdb89b859b4bac9e73d967ae1f5f68f
+      size: 492837
     - path: data/interim/dronerf_splits.json
       hash: md5
       md5: ee08c9dd9b9f6154dcd29933d9cddf26
@@ -52,7 +52,7 @@ stages:
     deps:
     - path: data/interim/dronerf.h5
       hash: md5
-      md5: be15cb2915ef1444b67dc6b99694de2f
+      md5: ebe5ce808e7dd1ff8e6e5739f1125c9c
       size: 4634087134
     - path: src/data/featurize.py
       hash: md5
@@ -63,7 +63,7 @@ stages:
         featurize:
           band_fs:
             H: 40000000.0
-            L: 10000000.0
+            L: 40000000.0
           welch:
             nperseg: 1024
             noverlap: 768
@@ -86,7 +86,7 @@ stages:
     deps:
     - path: data/interim/dronerf.h5
       hash: md5
-      md5: be15cb2915ef1444b67dc6b99694de2f
+      md5: ebe5ce808e7dd1ff8e6e5739f1125c9c
       size: 4634087134
     - path: src/data/featurize.py
       hash: md5
@@ -97,7 +97,7 @@ stages:
         featurize:
           band_fs:
             H: 40000000.0
-            L: 10000000.0
+            L: 40000000.0
           welch:
             nperseg: 1024
             noverlap: 768
@@ -109,12 +109,12 @@ stages:
     outs:
     - path: data/processed/L_meta.parquet
       hash: md5
-      md5: e53efde66cfa6493f1859691cfb76337
-      size: 987452
+      md5: ef4c4ee33a2eee9c606198697154f8aa
+      size: 987196
     - path: data/processed/L_scalar.npz
       hash: md5
-      md5: 4ff14fe6a877a79fa9cb915246956389
-      size: 458766
+      md5: 1c5fcfef0144654e066f809b9ecb1ea0
+      size: 458867
   train:
     cmd: python src/train/train.py
     deps:
@@ -128,8 +128,8 @@ stages:
       size: 444576
     - path: data/processed/L_scalar.npz
       hash: md5
-      md5: 4ff14fe6a877a79fa9cb915246956389
-      size: 458766
+      md5: 1c5fcfef0144654e066f809b9ecb1ea0
+      size: 458867
     - path: src/models/model.py
       hash: md5
       md5: 38b8f008dc0ed8bd2dfd542c12d00392
@@ -156,20 +156,20 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: a1ccdb78ee1c173df1294632024f1d39
-      size: 409
+      md5: 20512f6f1c4d888587777a0af4022380
+      size: 407
     - path: models/model.onnx
       hash: md5
-      md5: 902baed2d2c078559f2fa4403a218439
+      md5: a87b89bb33ff295a22b494792bca9174
       size: 15508
     - path: models/model.pt
       hash: md5
-      md5: e0c9fd8507489188f8884bc0b4ca5f44
+      md5: 24a6de0bb15083ebe26731c96bd7d51b
       size: 343706
     - path: models/scaler.json
       hash: md5
-      md5: 8bda79eeb10435b9d690e3e4b4f530dc
-      size: 440
+      md5: 5223f26637ec03fd0326a7d92dfe7865
+      size: 444
   eval_onnx:
     cmd: python src/train/eval_onnx.py
     deps:
@@ -179,16 +179,16 @@ stages:
       size: 444576
     - path: data/processed/L_scalar.npz
       hash: md5
-      md5: 4ff14fe6a877a79fa9cb915246956389
-      size: 458766
+      md5: 1c5fcfef0144654e066f809b9ecb1ea0
+      size: 458867
     - path: models/model.onnx
       hash: md5
-      md5: 902baed2d2c078559f2fa4403a218439
+      md5: a87b89bb33ff295a22b494792bca9174
       size: 15508
     - path: models/scaler.json
       hash: md5
-      md5: 8bda79eeb10435b9d690e3e4b4f530dc
-      size: 440
+      md5: 5223f26637ec03fd0326a7d92dfe7865
+      size: 444
     - path: src/train/eval_onnx.py
       hash: md5
       md5: 3fdaeaa28216700950b3121105f88e82
@@ -196,5 +196,5 @@ stages:
     outs:
     - path: metrics/onnx_scores.json
       hash: md5
-      md5: 560a442cd725f78ea47c52a33ecaef18
-      size: 206
+      md5: a60a69f3b0d8f801da29c4c6710caa98
+      size: 205

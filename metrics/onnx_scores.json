@@ -1,11 +1,11 @@
 {
   "test": {
-    "accuracy": 0.767048,
-    "f1_macro": 0.807198,
-    "f1_weighted": 0.764538,
-    "f1_background": 0.92756,
-    "f1_bebop": 0.691199,
-    "f1_ar": 0.727481,
-    "f1_phantom": 0.882555
+    "accuracy": 0.768546,
+    "f1_macro": 0.808649,
+    "f1_weighted": 0.765868,
+    "f1_background": 0.925066,
+    "f1_bebop": 0.69337,
+    "f1_ar": 0.72903,
+    "f1_phantom": 0.887131
   }
 }
