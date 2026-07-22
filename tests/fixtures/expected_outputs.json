@@ -1,0 +1,34 @@
+{
+  "ar": {
+    "recording_id": "10100_0_0",
+    "expected_prediction": {
+      "predicted_class": "Phantom",
+      "class_index": 3,
+      "confidence": 1.0
+    }
+  },
+  "background": {
+    "recording_id": "00000_21_2",
+    "expected_prediction": {
+      "predicted_class": "Phantom",
+      "class_index": 3,
+      "confidence": 1.0
+    }
+  },
+  "bebop": {
+    "recording_id": "10000_0_0",
+    "expected_prediction": {
+      "predicted_class": "Phantom",
+      "class_index": 3,
+      "confidence": 1.0
+    }
+  },
+  "phantom": {
+    "recording_id": "11000_0_2",
+    "expected_prediction": {
+      "predicted_class": "Phantom",
+      "class_index": 3,
+      "confidence": 1.0
+    }
+  }
+}
