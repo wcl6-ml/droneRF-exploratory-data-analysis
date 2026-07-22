@@ -4,6 +4,11 @@
 # Components
 
 ## data processing pipeline for training
+Example of .h5
+h5.keys() - ['metadata'], ['segments']
+h5['segments'].keys() - ["00000"]...
+
+
 
 ## Training
 
