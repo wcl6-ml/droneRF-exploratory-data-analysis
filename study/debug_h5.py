@@ -20,3 +20,5 @@ for key in tqdm(sorted(h5["segments"].keys())):
 #%%
 import numpy as np
 scalars = np.load(r"../data/processed/H_scalars.npz", allow_pickle=False)
+
+fixtures = np.load(r"../tests/fixtures/multiclass_samples.npz", allow_pickle=False)
