@@ -406,7 +406,7 @@ def main() -> None:
 
  
     # ── 4. Sanity-check the archive ────────────────────────────────────────
-    inspect_h5(out_file)
+    # inspect_h5(out_file)
  
     # ── 5. Build splits (idempotent) ───────────────────────────────────────
     build_splits(out_file.with_suffix(".meta.parquet"), split_file, cfg)

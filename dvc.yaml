@@ -61,6 +61,17 @@ stages:
     metrics:
       - metrics/onnx_scores.json:
           cache: false
+
+  # Extract the label map from params.yaml for prodcution
+  generate_label:
+    cmd: python src/utils/generate_labels.py
+    deps:
+      - src/utils/generate_labels.py
+      - config/params.yaml
+    outs:
+      - models/labels.json:
+          cache: false
+
 #  # ── Stage 4: Evaluate ───────────────────────────────────────────
 #  evaluate:
 #    cmd: python src/evaluate.py
