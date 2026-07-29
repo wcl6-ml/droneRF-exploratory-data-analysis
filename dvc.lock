@@ -5,8 +5,8 @@ stages:
     deps:
     - path: src/data/data_aggregator.py
       hash: md5
-      md5: 644b91843dce2b88f3f9de4c6c740e77
-      size: 17477
+      md5: cea9cf64940c4ca35d5de0588d466daf
+      size: 17479
     params:
       config/params.yaml:
         data_aggregator:
@@ -156,15 +156,15 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: 20512f6f1c4d888587777a0af4022380
-      size: 407
+      md5: 0cabb9b91f6d6ce6141881a6075c9841
+      size: 411
     - path: models/model.onnx
       hash: md5
-      md5: a87b89bb33ff295a22b494792bca9174
+      md5: 9bcf1ba489dbd8d278ef2092e911e851
       size: 15508
     - path: models/model.pt
       hash: md5
-      md5: 24a6de0bb15083ebe26731c96bd7d51b
+      md5: 0df8c98af51b653a869fdde710ece97a
       size: 343706
     - path: models/scaler.json
       hash: md5
@@ -183,7 +183,7 @@ stages:
       size: 458867
     - path: models/model.onnx
       hash: md5
-      md5: a87b89bb33ff295a22b494792bca9174
+      md5: 9bcf1ba489dbd8d278ef2092e911e851
       size: 15508
     - path: models/scaler.json
       hash: md5
@@ -196,5 +196,21 @@ stages:
     outs:
     - path: metrics/onnx_scores.json
       hash: md5
-      md5: a60a69f3b0d8f801da29c4c6710caa98
-      size: 205
+      md5: 9972d1c5e3259319289c5e763fe04de0
+      size: 207
+  generate_label:
+    cmd: python src/utils/generate_labels.py
+    deps:
+    - path: config/params.yaml
+      hash: md5
+      md5: e7e58ebf009df5dc17dd787233ba365b
+      size: 1285
+    - path: src/utils/generate_labels.py
+      hash: md5
+      md5: 7162b316d48da38b20836bb0da47597f
+      size: 1985
+    outs:
+    - path: models/labels.json
+      hash: md5
+      md5: b423e601108d22fb67344ff0270efa88
+      size: 50
