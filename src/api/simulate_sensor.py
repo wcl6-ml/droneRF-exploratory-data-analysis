@@ -35,8 +35,9 @@ from typing import Iterator, Optional
 
 import h5py
 import numpy as np
+import requests
 
-
+from tqdm import tqdm
 # ---------------------------------------------------------------------------
 # Small helper -- h5py attr string decoding is inconsistent across versions
 # ---------------------------------------------------------------------------
@@ -183,7 +184,7 @@ def _scenario_order(
 
     cursors: dict[str, int] = defaultdict(int)  # next index to hand out, per class
     ordered_rec_ids = []
-    for drone_type in scenario:
+    for drone_type in tqdm(scenario):
         pool = by_class.get(drone_type)
         if not pool:
             raise ValueError(
@@ -296,6 +297,69 @@ def replay(
                 time.sleep(max(0.0, duration / speed_factor))
 
 
+ 
+# ---------------------------------------------------------------------------
+# HTTP client -- the real integration test. Exercises the same
+# JSON-over-HTTP path a real edge client would use to talk to a running
+# `uvicorn src.api.main:app` instance, instead of calling service.py
+# in-process. This is what finally proves predictor.py + service.py +
+# main.py + labels.json agree with each other end to end.
+# ---------------------------------------------------------------------------
+ 
+def check_api_health(api_url: str, timeout: float = 5.0) -> None:
+    """
+    Fails fast, with a clear message, if the API isn't up or the model
+    didn't load -- rather than letting the first /v1/predict call raise
+    a generic connection error mid-scenario.
+    """
+    resp = requests.get(f"{api_url}/health", timeout=timeout)
+    resp.raise_for_status()
+    body = resp.json()
+    if not body.get("model_loaded"):
+        raise RuntimeError(f"API at {api_url} is up but model_loaded=False: {body}")
+ 
+ 
+def send_window(window: dict, api_url: str, timeout: float = 5.0) -> dict:
+    """
+    POSTs one window's raw_h/raw_l to a running /v1/predict endpoint and
+    returns the response with ground truth attached, so the caller can
+    compare predicted vs. actual without threading extra state around.
+ 
+    PredictRequest (schemas.py) expects raw_h/raw_l as plain JSON arrays
+    of floats -- np.ndarray isn't JSON-serializable, so .tolist() is
+    required here (this upcasts float32 -> Python float/float64, which
+    is fine: it's just the wire representation, not what the model
+    computes on -- service.py re-casts to float32 before scaling).
+    """
+    payload = {
+        "raw_h": window["raw_h"].tolist(),
+        "raw_l": window["raw_l"].tolist(),
+    }
+    resp = requests.post(f"{api_url}/v1/predict", json=payload, timeout=timeout)
+    resp.raise_for_status()
+    result = resp.json()
+    result["ground_truth"] = window["drone_type"]
+    result["correct"] = result["predicted_class"] == window["drone_type"]
+    return result
+ 
+ 
+def replay_over_http(stream: Iterator[dict], api_url: str, timeout: float = 5.0) -> Iterator[dict]:
+    """
+    Wraps a replay() stream, POSTing each window to the API as it's
+    emitted and yielding the prediction result (with ground truth
+    attached) instead of the raw window. A per-window network/HTTP
+    failure is logged and skipped rather than killing the whole
+    scenario run -- one dropped request during a long monitored replay
+    shouldn't take down the client loop.
+    """
+    for window in stream:
+        try:
+            yield send_window(window, api_url, timeout=timeout)
+        except requests.exceptions.RequestException as e:
+            print(f"  [!] request failed for rec={window['recording_id']} pos={window['seg_within_file']}: {e}")
+ 
+
+
 # ---------------------------------------------------------------------------
 # Standalone run -- validates this script alone, before anything downstream exists
 # ---------------------------------------------------------------------------
@@ -322,6 +386,17 @@ def main():
         action="store_true",
         help="Disable reshuffle-on-exhaust: reuse recordings in the same fixed order every lap instead of a fresh shuffle",
     )
+    parser.add_argument(
+        "--api-url",
+        default=None,
+        help=(
+            "If set, POST each window to '<api-url>/v1/predict' instead of just "
+            "printing shapes -- e.g. --api-url http://localhost:8000. Runs a "
+            "/health check first and reports running accuracy vs. ground truth."
+        ),
+    )
+    parser.add_argument("--timeout", type=float, default=5.0, help="HTTP request timeout in seconds (only used with --api-url)")
+
     args = parser.parse_args()
 
     h5_path = Path(args.h5)
@@ -355,14 +430,33 @@ def main():
     )
 
     print(f"Replaying split='{args.split}' mode='{args.mode}' speed={args.speed}x ...\n")
-    for i, window in enumerate(stream):
-        print(
-            f"[{i:04d}] rec={window['recording_id']:<20} "
-            f"pos={window['seg_within_file']:<3} "
-            f"truth={window['drone_type']:<12} "
-            f"raw_h={window['raw_h'].shape} raw_l={window['raw_l'].shape}"
-        )
+
+    if args.api_url:
+        check_api_health(args.api_url, timeout=args.timeout)
+        print(f"API at {args.api_url} is healthy. Streaming predictions...\n")
+ 
+        n_seen, n_correct = 0, 0
+        for i, result in enumerate(replay_over_http(stream, args.api_url, timeout=args.timeout)):
+            n_seen += 1
+            n_correct += result["correct"]
+            mark = "OK " if result["correct"] else "ERR"
+            print(
+                f"[{i:04d}] {mark} truth={result['ground_truth']:<12} "
+                f"pred={result['predicted_class']:<12} "
+                f"conf={result['confidence']:.3f} "
+                f"inference_ms={result['inference_time_ms']:.2f} "
+                f"running_acc={n_correct / n_seen:.3f}"
+            )
+    else:
+        for i, window in enumerate(stream):
+            print(
+                f"[{i:04d}] rec={window['recording_id']:<20} "
+                f"pos={window['seg_within_file']:<3} "
+                f"truth={window['drone_type']:<12} "
+                f"raw_h={window['raw_h'].shape} raw_l={window['raw_l'].shape}"
+            )
+ 
 
 
 if __name__ == "__main__":
-    main()
+    main() 
