@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 *.egg*
 __init__.py
+*.python-version
+
 # data
 data/*
 dvc-local

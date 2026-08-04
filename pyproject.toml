@@ -42,3 +42,10 @@ dev = [
     "flake8",
     "httpx", # Useful for testing FastAPI
 ]
+
+[tool.uv.workspace]
+members = [
+    "src/drone-edge",
+    "src/drone-centre",
+    "src/drone-dev",
+]
