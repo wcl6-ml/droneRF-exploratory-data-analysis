@@ -2,3 +2,9 @@
 awscli = { version = "latest", symlink_bins = "true" }
 tmux = "latest"
 uv = "latest"
+
+[settings]
+python.uv_venv_auto = true
+idiomatic_version_file_enable_tools = ["python"]
+experimental = true
+
