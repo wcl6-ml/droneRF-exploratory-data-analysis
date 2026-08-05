@@ -1,7 +1,12 @@
 FROM nvcr.io/nvidia/pytorch:25.10-py3
 
 RUN apt-get update && apt-get install -y \
-    bash-completion sudo curl git \
+    bash-completion \
+    sudo \
+    curl \
+    git \
+    tar \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=vscode
