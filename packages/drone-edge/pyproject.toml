@@ -1,17 +1,28 @@
 [project]
 name = "drone-edge"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.0.0"
+description = "For containerization and deploy on edge"
 readme = "README.md"
 authors = [
     { name = "wcl6-ml", email = "weichung.lai6@gmail.com" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "fastapi>=0.141.1",
+    "numpy>=2.2.6",
+    "onnxruntime>=1.24.3",
+    "pydantic>=2.13.4",
+    "scipy>=1.15.3",
+    "uvicorn[standard]>=0.52.1",
+]
 
 [project.scripts]
-drone-edge = "drone_edge:main"
+drone-edge = "drone_edge.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/drone_edge"]
 
 [build-system]
-requires = ["uv_build>=0.12.1,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
