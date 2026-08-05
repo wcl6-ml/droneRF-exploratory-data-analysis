@@ -1,7 +1,6 @@
 import os
 import json
 import numpy as np
-import h5py
 import onnxruntime as ort
 from scipy import signal as scipy_signal
 from pathlib import Path
@@ -57,13 +56,6 @@ class DroneRFPredictor:
         self.input_name = self.session.get_inputs()[0].name
         return self
 
-    def load_real_hdf5_sample(hdf5_path: str, record_id: str):
-        """Pulls real raw arrays from your dataset storage."""
-        with h5py.File(hdf5_path, 'r') as f:
-            # Assuming your structure saves raw chunks per recording_id
-            raw_h = f[f"{record_id}/raw_h"][:]
-            raw_l = f[f"{record_id}/raw_l"][:]
-        return raw_h, raw_l
     # ── DSP CORE TRANSFORMS (Copied from featurize.py) ──────────────────────
 
     def _deinterleave(self, x: np.ndarray) -> np.ndarray:
