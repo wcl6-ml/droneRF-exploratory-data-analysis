@@ -12,7 +12,7 @@ GET  /v1/model/info     class list + model metadata
 POST /v1/predict        classify one raw H/L window
 
 Run:
-    uvicorn src.api.main:app --reload --port 8000
+    uvicorn drone_edge.main:app --reload --port 8000
 Interactive docs (auto-generated from schemas.py) at:
     http://localhost:8000/docs
 """
@@ -21,13 +21,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 
-from src.api.schemas import (
+from drone_edge.schemas import (
     PredictRequest,
     PredictResponse,
     ModelInfoResponse,
     HealthResponse,
 )
-from src.api.service import ModelService
+from drone_edge.service import ModelService
 
 MODEL_PATH = "models/model.onnx"
 SCALER_PATH = "models/scaler.json"

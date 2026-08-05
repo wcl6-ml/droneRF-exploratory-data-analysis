@@ -27,7 +27,7 @@ from typing import Optional
 
 import numpy as np
 
-from src.api.predictor import DroneRFPredictor
+from drone_edge.predictor import DroneRFPredictor
 
 
 def load_label_names(labels_path: Path) -> list[str]:
