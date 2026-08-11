@@ -1,7 +1,7 @@
 # Build from the REPO ROOT, not this file's directory, so we can reach
-# models/ which lives outside packages/dronerf-edge/:
+# models/ which lives outside packages/drone-edge/:
 #
-#   docker build -f packages/dronerf-edge/Dockerfile -t dronerf-edge .
+#   docker build -f packages/drone-edge/Dockerfile -t drone-edge .
 #
 # ---------------------------------------------------------------------------
 # Stage 1: builder -- resolves + installs dependencies and the package
@@ -23,14 +23,15 @@ ENV UV_COMPILE_BYTECODE=1 \
 # skipped entirely on every rebuild unless pyproject.toml or uv.lock
 # actually change -- i.e. editing service.py does not re-trigger an
 # onnxruntime re-resolve.
-COPY packages/dronerf-edge/pyproject.toml packages/dronerf-edge/uv.lock ./
+COPY packages/drone-edge/pyproject.toml packages/drone-edge/uv.lock ./
 RUN uv sync --locked --no-install-project --no-dev
 
 # --- App layer ----------------------------------------------------------
 # Now copy source and install the project itself into the already-built
 # environment. --no-editable: we want a real install, not a symlink back
 # to /app/src (which won't exist in the runtime stage).
-COPY packages/dronerf-edge/src ./src
+COPY packages/drone-edge/src ./src
+COPY packages/drone-edge/README.md ./README.md
 RUN uv sync --locked --no-editable --no-dev
 
 
