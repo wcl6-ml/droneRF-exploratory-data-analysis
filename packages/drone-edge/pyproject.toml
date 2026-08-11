@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-drone-edge = "drone_edge.main:app"
+drone-edge = "drone_edge.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/drone_edge"]
