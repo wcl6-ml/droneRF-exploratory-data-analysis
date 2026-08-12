@@ -108,7 +108,13 @@ def predict(req: PredictRequest):
 
 def main():
     """Entry point for the application when run as a script"""
-    uvicorn.run("drone_edge.main:app", host=HOST, port=PORT, reload=True)
+    uvicorn.run(
+        "drone_edge.main:app",  # The import string path
+        host=HOST, 
+        port=PORT, 
+        reload=True,
+        #app_dir="src"           
+    )
 
 if __name__ == "__main__":
     main()

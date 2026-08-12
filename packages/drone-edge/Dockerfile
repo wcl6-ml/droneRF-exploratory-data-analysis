@@ -75,4 +75,5 @@ HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
 # of being swallowed by an intermediate shell. 0.0.0.0, not 127.0.0.1 --
 # uvicorn's default loopback bind is unreachable from outside the
 # container's own network namespace.
-CMD ["uvicorn", "dronerf_edge.main:app", "--host", "0.0.0.0", "--port", "8000"]
+#CMD ["uvicorn", "drone_edge.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/.venv/bin/drone-edge"]
