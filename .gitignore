@@ -27,6 +27,8 @@ spyder/
 
 # log
 log/*
+payload.json
+bench_results.md
 
 # vscode
 .vscode/*

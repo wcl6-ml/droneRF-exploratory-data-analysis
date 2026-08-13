@@ -11,11 +11,16 @@ dependencies = [
     "h5py>=3.16.0",
     "numpy>=2.2.6",
     "requests>=2.34.2",
+    "tqdm>=4.70.0",
 ]
 
 [project.scripts]
 drone-dev = "drone_dev:main"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/drone_dev"]
+
 [build-system]
-requires = ["uv_build>=0.12.1,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
