@@ -357,6 +357,69 @@ def replay_over_http(stream: Iterator[dict], api_url: str, timeout: float = 5.0)
             yield send_window(window, api_url, timeout=timeout)
         except requests.exceptions.RequestException as e:
             print(f"  [!] request failed for rec={window['recording_id']} pos={window['seg_within_file']}: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Latency benchmark -- server-reported inference_time_ms, not wall-clock
+# HTTP round trip. Complements (does not replace) an external tool like
+# `hey`, which measures the latter. Fires requests back-to-back
+# (no real-time pacing) against real test-set windows, single-stream,
+# since that's the realistic edge-client scenario -- not concurrent load.
+# ---------------------------------------------------------------------------
+
+def run_benchmark(stream: Iterator[dict], api_url: str, n: int, timeout: float = 5.0) -> dict:
+    """
+    Sends up to `n` windows from `stream` to the API as fast as
+    send_window() returns, collecting the server-reported
+    inference_time_ms from each successful response.
+
+    Unlike replay_over_http(), a failed request here is NOT silently
+    skipped -- it's counted and raised at the end if any occurred,
+    because a benchmark run with silently-missing samples would report
+    a p95 computed over fewer requests than claimed, which is exactly
+    the kind of thing you don't want to find out after it's already in
+    a README.
+
+    Returns:
+        {
+          "n_requested": int,
+          "n_ok": int,
+          "n_failed": int,
+          "times_ms": list[float],   # inference_time_ms per successful request
+          "p50": float, "p95": float, "p99": float,
+        }
+    """
+    times_ms: list[float] = []
+    failures: list[str] = []
+
+    for i, window in zip(range(n), stream):
+        try:
+            result = send_window(window, api_url, timeout=timeout)
+            times_ms.append(result["inference_time_ms"])
+        except requests.exceptions.RequestException as e:
+            failures.append(f"rec={window['recording_id']} pos={window['seg_within_file']}: {e}")
+
+    if not times_ms:
+        raise RuntimeError(f"Benchmark got zero successful responses out of {n} requested.")
+
+    summary = {
+        "n_requested": n,
+        "n_ok": len(times_ms),
+        "n_failed": len(failures),
+        "times_ms": times_ms,
+        "p50": float(np.percentile(times_ms, 50)),
+        "p95": float(np.percentile(times_ms, 95)),
+        "p99": float(np.percentile(times_ms, 99)),
+    }
+
+    if failures:
+        print(f"  [!] {len(failures)}/{n} requests failed during benchmark:")
+        for f in failures[:10]:
+            print(f"      {f}")
+        if len(failures) > 10:
+            print(f"      ... and {len(failures) - 10} more")
+
+    return summary
  
 
 
@@ -396,8 +459,24 @@ def main():
         ),
     )
     parser.add_argument("--timeout", type=float, default=5.0, help="HTTP request timeout in seconds (only used with --api-url)")
+    parser.add_argument(
+        "--bench",
+        type=int,
+        default=None,
+        metavar="N",
+        help=(
+            "Benchmark mode: requires --api-url. Sends N real test-set windows "
+            "back-to-back (no real-time pacing, single-stream) and reports "
+            "p50/p95/p99 of server-reported inference_time_ms, then exits. "
+            "Complements external HTTP-latency tools like `hey`, which measure "
+            "full round-trip time instead of pure server-side inference time."
+        ),
+    )
 
     args = parser.parse_args()
+
+    if args.bench is not None and not args.api_url:
+        parser.error("--bench requires --api-url")
 
     h5_path = Path(args.h5)
     split_file = Path(args.splits)
@@ -413,6 +492,36 @@ def main():
                 f"  {cls:<12} : {s['recordings']:5d} distinct recordings, "
                 f"{s['total_clips']:6d} total clips, {avg_clips:.1f} clips/recording avg"
             )
+        return
+
+    if args.bench is not None:
+        check_api_health(args.api_url, timeout=args.timeout)
+        print(f"API at {args.api_url} is healthy. Running benchmark: {args.bench} requests, single-stream...\n")
+
+        # mode="shuffled" + an effectively-infinite speed_factor: real test-set
+        # windows, but with no real-time pacing between them -- we want
+        # requests fired back-to-back, not spaced to match original capture
+        # timing (that's what --mode/--speed are for in normal replay).
+        bench_stream = replay(
+            h5_path=h5_path,
+            split_file=split_file,
+            split=args.split,
+            mode="shuffled",
+            speed_factor=1e9,
+        )
+        summary = run_benchmark(bench_stream, args.api_url, n=args.bench, timeout=args.timeout)
+
+        print(
+            f"\nServer-side inference_time_ms over {summary['n_ok']}/{summary['n_requested']} requests "
+            f"({summary['n_failed']} failed):"
+        )
+        print(f"  p50 = {summary['p50']:.2f} ms")
+        print(f"  p95 = {summary['p95']:.2f} ms")
+        print(f"  p99 = {summary['p99']:.2f} ms")
+        print(
+            "\nNote: this is pure server-side inference time, not full HTTP "
+            "round-trip. Pair with `hey` (or similar) for end-to-end client-perceived latency."
+        )
         return
 
     scenario = parse_scenario_spec(args.scenario) if args.mode == "scenario" else None
@@ -459,4 +568,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()
+
+
+
