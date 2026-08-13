@@ -8,7 +8,13 @@
   "remoteUser": "vscode",
   "postCreateCommand": "chmod +x scripts/setup & scripts/setup",
 //"postCreateCommand": "chmod +x scripts/setup && scripts/setup && chmod +x scripts/install_torch.sh && scripts/install_torch.sh"
-
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [
+    "8787",
+    "8786"
+  ],
   // Setup extensions for VS Code inside the container
   "customizations": {
     "vscode": {

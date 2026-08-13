@@ -16,7 +16,8 @@ Run:
 Interactive docs (auto-generated from schemas.py) at:
     http://localhost:8000/docs
 """
-
+import os
+import uvicorn
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -34,6 +35,10 @@ SCALER_PATH = "models/scaler.json"
 LABELS_PATH = "models/labels.json"
 MODEL_VERSION = "v1.0.0"
 SEGMENT_LENGTH = 100_000  # must match config/params.yaml's data_aggregator.segment_length
+
+PORT = int(os.getenv("PREDICTOR_API", "22111"))
+HOST = os.getenv("PREDICTOR_HOST", "0.0.0.0")
+
 
 # Holds the one, process-wide ModelService instance. A plain dict (not a
 # bare global variable) so it's explicit and easy to clear in tests.
@@ -100,3 +105,17 @@ def predict(req: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Inference failed: {e}")
     return {**result, "model_version": MODEL_VERSION}
+
+def main():
+    """Entry point for the application when run as a script"""
+    uvicorn.run(
+        "drone_edge.main:app",  # The import string path
+        host=HOST, 
+        port=PORT, 
+        reload=True,
+        #app_dir="src"           
+    )
+
+if __name__ == "__main__":
+    main()
+
